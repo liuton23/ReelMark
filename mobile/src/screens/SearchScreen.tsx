@@ -4,6 +4,8 @@ import { Text, useTheme, Searchbar } from 'react-native-paper';
 import { apiService } from '../services/api';
 import SearchResultCard from '../components/SearchResultCard';
 import QuickAddSheet from '../components/QuickAddSheet';
+import { haptics } from '../utils/haptics';
+import Toast from 'react-native-toast-message';
 
 const DEFAULT_USER_ID = '572bc43f-b148-4a6a-9ce3-e929b152fa57';
 
@@ -45,29 +47,42 @@ export default function SearchScreen() {
     Keyboard.dismiss();
   };
 
-  const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
-    if (!selectedMovie) return;
+const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
+  if (!selectedMovie) return;
 
-    try {
-      const contentType = selectedMovie.title ? 'movie' : 'tv';
-      await apiService.addWatchEntry({
-        userId: DEFAULT_USER_ID,
-        tmdbId: selectedMovie.id,
-        contentType,
-        rating,
-        notes: notes || undefined,
-      });
+  try {
+    const contentType = selectedMovie.title ? 'movie' : 'tv';
+    await apiService.addWatchEntry({
+      userId: DEFAULT_USER_ID,
+      tmdbId: selectedMovie.id,
+      contentType,
+      rating,
+      notes: notes || undefined,
+    });
 
-      setSheetVisible(false);
-      setSelectedMovie(null);
-      
-      // Show success feedback
-      alert(`Added "${selectedMovie.title || selectedMovie.name}" to your collection!`);
-    } catch (error) {
-      console.error('Error adding entry:', error);
-      alert('Failed to add to collection. Please try again.');
-    }
-  };
+    setSheetVisible(false);
+    setSelectedMovie(null);
+    
+    // Replace alert with toast
+    haptics.success();
+    Toast.show({
+      type: 'success',
+      text1: 'Added to Collection!',
+      text2: `${selectedMovie.title || selectedMovie.name} has been logged`,
+      position: 'bottom',
+      visibilityTime: 3000,
+    });
+  } catch (error) {
+    console.error('Error adding entry:', error);
+    haptics.error();
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to Add',
+      text2: 'Please try again',
+      position: 'bottom',
+    });
+  }
+};
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

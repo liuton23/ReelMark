@@ -1,82 +1,109 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Alert } from 'react-native';
-import { Text, useTheme, Button, IconButton, Chip, Divider } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/types';
-import { getTMDBPosterUrl, apiService } from '../services/api';
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
+import {
+  Text,
+  useTheme,
+  Button,
+  IconButton,
+  Chip,
+  Divider,
+} from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/types";
+import { getTMDBPosterUrl, apiService } from "../services/api";
+import { haptics } from "../utils/haptics";
+import Toast from "react-native-toast-message";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Detail'>;
+type Props = NativeStackScreenProps<RootStackParamList, "Detail">;
 
 export default function DetailScreen({ route, navigation }: Props) {
   const theme = useTheme();
   const { entry } = route.params;
   const { content, rating, notes, watchedAt } = entry;
-  
+
   const [deleting, setDeleting] = useState(false);
 
-  const posterUrl = getTMDBPosterUrl(content.posterPath, 'w500');
-  const watchDate = new Date(watchedAt).toLocaleDateString('en-US', { 
-    weekday: 'long',
-    month: 'long', 
-    day: 'numeric',
-    year: 'numeric' 
+  const posterUrl = getTMDBPosterUrl(content.posterPath, "w500");
+  const watchDate = new Date(watchedAt).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 
   const handleEdit = () => {
     // TODO: Navigate to edit screen or show edit modal
-    Alert.alert('Coming Soon', 'Edit functionality will be added next!');
+    Alert.alert("Coming Soon", "Edit functionality will be added next!");
   };
 
   const handleDelete = () => {
+    haptics.warning();
     Alert.alert(
-      'Lost the Tape?',
+      "Lost the Tape?",
       `Remove "${content.title}" from your collection?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Remove',
-          style: 'destructive',
+          text: "Remove",
+          style: "destructive",
           onPress: async () => {
             setDeleting(true);
             try {
               await apiService.deleteWatchEntry(entry.id);
-              Alert.alert('Removed', 'Entry removed from your collection');
+              haptics.success();
+              Toast.show({
+                type: "success",
+                text1: "Removed from Collection",
+                text2: `${content.title} has been deleted`,
+                position: "bottom",
+              });
               navigation.goBack();
             } catch (error) {
-              console.error('Error deleting:', error);
-              Alert.alert('Error', 'Failed to remove entry');
+              console.error("Error deleting:", error);
+              haptics.error();
+              Toast.show({
+                type: "error",
+                text1: "Failed to Delete",
+                text2: "Please try again",
+                position: "bottom",
+              });
               setDeleting(false);
             }
           },
         },
-      ]
+      ],
     );
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Header with Poster */}
       <View style={styles.posterContainer}>
         {posterUrl ? (
-          <Image 
-            source={{ uri: posterUrl }} 
+          <Image
+            source={{ uri: posterUrl }}
             style={styles.poster}
             resizeMode="cover"
           />
         ) : (
-          <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <MaterialCommunityIcons 
-              name="filmstrip" 
-              size={80} 
-              color={theme.colors.onSurfaceVariant} 
+          <View
+            style={[
+              styles.posterPlaceholder,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="filmstrip"
+              size={80}
+              color={theme.colors.onSurfaceVariant}
             />
           </View>
         )}
-        
+
         {/* Action Buttons Overlay */}
         <View style={styles.headerActions}>
           <IconButton
@@ -100,11 +127,11 @@ export default function DetailScreen({ route, navigation }: Props) {
       {/* Content */}
       <View style={styles.content}>
         {/* Title */}
-        <Text 
+        <Text
           variant="headlineMedium"
-          style={{ 
-            color: theme.colors.onSurface, 
-            fontFamily: 'BebasNeue_400Regular',
+          style={{
+            color: theme.colors.onSurface,
+            fontFamily: "BebasNeue_400Regular",
             fontSize: 32,
             marginBottom: 8,
           }}
@@ -114,11 +141,15 @@ export default function DetailScreen({ route, navigation }: Props) {
 
         {/* Metadata */}
         <View style={styles.metadata}>
-          <Text 
-            variant="bodyLarge" 
-            style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'VT323_400Regular' }}
+          <Text
+            variant="bodyLarge"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              fontFamily: "VT323_400Regular",
+            }}
           >
-            {content.releaseYear} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
+            {content.releaseYear} •{" "}
+            {content.type === "MOVIE" ? "Movie" : "TV Show"}
             {content.runtime && ` • ${content.runtime} min`}
           </Text>
         </View>
@@ -127,17 +158,17 @@ export default function DetailScreen({ route, navigation }: Props) {
         {content.genres && content.genres.length > 0 && (
           <View style={styles.genres}>
             {content.genres.map((genre, index) => (
-              <Chip 
-                key={index} 
-                style={{ 
+              <Chip
+                key={index}
+                style={{
                   backgroundColor: theme.colors.surfaceVariant,
                   marginRight: 8,
-                  marginBottom: 8
+                  marginBottom: 8,
                 }}
-                textStyle={{ 
+                textStyle={{
                   color: theme.colors.onSurfaceVariant,
-                  fontFamily: 'VT323_400Regular',
-                  fontSize: 14
+                  fontFamily: "VT323_400Regular",
+                  fontSize: 14,
                 }}
               >
                 {genre}
@@ -151,29 +182,29 @@ export default function DetailScreen({ route, navigation }: Props) {
         {/* Your Rating */}
         {rating && (
           <View style={styles.section}>
-            <Text 
+            <Text
               variant="labelLarge"
-              style={{ 
+              style={{
                 color: theme.colors.primary,
-                fontFamily: 'VT323_400Regular',
+                fontFamily: "VT323_400Regular",
                 fontSize: 16,
-                marginBottom: 8
+                marginBottom: 8,
               }}
             >
               YOUR RATING
             </Text>
             <View style={styles.rating}>
-              <MaterialCommunityIcons 
-                name="star" 
-                size={28} 
-                color={theme.colors.primary} 
+              <MaterialCommunityIcons
+                name="star"
+                size={28}
+                color={theme.colors.primary}
               />
-              <Text 
-                variant="headlineSmall" 
-                style={{ 
-                  color: theme.colors.primary, 
+              <Text
+                variant="headlineSmall"
+                style={{
+                  color: theme.colors.primary,
                   marginLeft: 8,
-                  fontWeight: 'bold'
+                  fontWeight: "bold",
                 }}
               >
                 {rating}/10
@@ -184,21 +215,18 @@ export default function DetailScreen({ route, navigation }: Props) {
 
         {/* Watch Date */}
         <View style={styles.section}>
-          <Text 
+          <Text
             variant="labelLarge"
-            style={{ 
+            style={{
               color: theme.colors.onSurfaceVariant,
-              fontFamily: 'VT323_400Regular',
+              fontFamily: "VT323_400Regular",
               fontSize: 16,
-              marginBottom: 4
+              marginBottom: 4,
             }}
           >
             CHECKED OUT ON
           </Text>
-          <Text 
-            variant="bodyLarge" 
-            style={{ color: theme.colors.onSurface }}
-          >
+          <Text variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
             {watchDate}
           </Text>
         </View>
@@ -207,21 +235,21 @@ export default function DetailScreen({ route, navigation }: Props) {
 
         {/* Your Notes */}
         <View style={styles.section}>
-          <Text 
+          <Text
             variant="titleMedium"
-            style={{ 
+            style={{
               color: theme.colors.onSurface,
-              fontFamily: 'BebasNeue_400Regular',
+              fontFamily: "BebasNeue_400Regular",
               fontSize: 20,
-              marginBottom: 12
+              marginBottom: 12,
             }}
           >
             YOUR NOTES
           </Text>
           {notes ? (
-            <Text 
-              variant="bodyLarge" 
-              style={{ 
+            <Text
+              variant="bodyLarge"
+              style={{
                 color: theme.colors.onSurface,
                 lineHeight: 24,
               }}
@@ -229,11 +257,11 @@ export default function DetailScreen({ route, navigation }: Props) {
               {notes}
             </Text>
           ) : (
-            <Text 
-              variant="bodyMedium" 
-              style={{ 
+            <Text
+              variant="bodyMedium"
+              style={{
                 color: theme.colors.onSurfaceVariant,
-                fontStyle: 'italic'
+                fontStyle: "italic",
               }}
             >
               No notes for this one
@@ -246,20 +274,20 @@ export default function DetailScreen({ route, navigation }: Props) {
           <>
             <Divider style={{ marginVertical: 20 }} />
             <View style={styles.section}>
-              <Text 
+              <Text
                 variant="titleMedium"
-                style={{ 
+                style={{
                   color: theme.colors.onSurface,
-                  fontFamily: 'BebasNeue_400Regular',
+                  fontFamily: "BebasNeue_400Regular",
                   fontSize: 20,
-                  marginBottom: 12
+                  marginBottom: 12,
                 }}
               >
                 OVERVIEW
               </Text>
-              <Text 
-                variant="bodyMedium" 
-                style={{ 
+              <Text
+                variant="bodyMedium"
+                style={{
                   color: theme.colors.onSurfaceVariant,
                   lineHeight: 22,
                 }}
@@ -271,34 +299,41 @@ export default function DetailScreen({ route, navigation }: Props) {
         )}
 
         {/* TV Show Info */}
-        {content.type === 'TV_SHOW' && (content.numberOfSeasons || content.numberOfEpisodes) && (
-          <>
-            <Divider style={{ marginVertical: 20 }} />
-            <View style={styles.section}>
-              <Text 
-                variant="titleMedium"
-                style={{ 
-                  color: theme.colors.onSurface,
-                  fontFamily: 'BebasNeue_400Regular',
-                  fontSize: 20,
-                  marginBottom: 12
-                }}
-              >
-                SERIES INFO
-              </Text>
-              {content.numberOfSeasons && (
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Seasons: {content.numberOfSeasons}
+        {content.type === "TV_SHOW" &&
+          (content.numberOfSeasons || content.numberOfEpisodes) && (
+            <>
+              <Divider style={{ marginVertical: 20 }} />
+              <View style={styles.section}>
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontFamily: "BebasNeue_400Regular",
+                    fontSize: 20,
+                    marginBottom: 12,
+                  }}
+                >
+                  SERIES INFO
                 </Text>
-              )}
-              {content.numberOfEpisodes && (
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Total Episodes: {content.numberOfEpisodes}
-                </Text>
-              )}
-            </View>
-          </>
-        )}
+                {content.numberOfSeasons && (
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    Seasons: {content.numberOfSeasons}
+                  </Text>
+                )}
+                {content.numberOfEpisodes && (
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    Total Episodes: {content.numberOfEpisodes}
+                  </Text>
+                )}
+              </View>
+            </>
+          )}
       </View>
     </ScrollView>
   );
@@ -309,25 +344,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   posterContainer: {
-    width: '100%',
+    width: "100%",
     height: 400,
-    position: 'relative',
+    position: "relative",
   },
   poster: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   posterPlaceholder: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerActions: {
-    position: 'absolute',
+    position: "absolute",
     top: 16,
     right: 16,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   content: {
@@ -337,14 +372,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   genres: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   section: {
     marginBottom: 20,
   },
   rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

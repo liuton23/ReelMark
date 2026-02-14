@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { Text, useTheme, IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AnimatedPressable from './AnimatedPressable';
 
 interface SearchResult {
   id: number;
@@ -36,60 +37,58 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
   const mediaType = result.media_type || (result.title ? 'movie' : 'tv');
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      {/* Poster */}
-      <View style={styles.posterContainer}>
-        {posterUrl ? (
-          <Image 
-            source={{ uri: posterUrl }} 
-            style={styles.poster}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <MaterialCommunityIcons 
-              name="filmstrip" 
-              size={30} 
-              color={theme.colors.onSurfaceVariant} 
+    <AnimatedPressable onPress={onPress}>
+      <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+        {/* Poster */}
+        <View style={styles.posterContainer}>
+          {posterUrl ? (
+            <Image 
+              source={{ uri: posterUrl }} 
+              style={styles.poster}
+              resizeMode="cover"
             />
+          ) : (
+            <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <MaterialCommunityIcons 
+                name="filmstrip" 
+                size={30} 
+                color={theme.colors.onSurfaceVariant} 
+              />
+            </View>
+          )}
+        </View>
+
+        {/* Info */}
+        <View style={styles.info}>
+          <Text 
+            variant="titleMedium" 
+            numberOfLines={2}
+            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 16 }}
+          >
+            {title}
+          </Text>
+          
+          <View style={styles.metadata}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'VT323_400Regular' }}>
+              {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
+            </Text>
           </View>
+        </View>
+
+        {/* Quick Add Button */}
+        {onQuickAdd && (
+          <IconButton
+            icon="plus-circle"
+            iconColor={theme.colors.primary}
+            size={28}
+            onPress={(e) => {
+              e.stopPropagation();
+              onQuickAdd();
+            }}
+          />
         )}
       </View>
-
-      {/* Info */}
-      <View style={styles.info}>
-        <Text 
-          variant="titleMedium" 
-          numberOfLines={2}
-          style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 16 }}
-        >
-          {title}
-        </Text>
-        
-        <View style={styles.metadata}>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'VT323_400Regular' }}>
-            {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Quick Add Button */}
-      {onQuickAdd && (
-        <IconButton
-          icon="plus-circle"
-          iconColor={theme.colors.primary}
-          size={28}
-          onPress={(e) => {
-            e.stopPropagation();
-            onQuickAdd();
-          }}
-        />
-      )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

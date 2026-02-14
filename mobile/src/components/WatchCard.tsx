@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { WatchEntry } from '../services/api';
 import { getTMDBPosterUrl } from '../services/api';
+import AnimatedPressable from './AnimatedPressable'; // Add this import
 
 interface WatchCardProps {
   entry: WatchEntry;
@@ -22,72 +23,70 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
   });
 
   return (
-    <TouchableOpacity 
-      style={[styles.container, { backgroundColor: theme.colors.surface }]} 
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      {/* Poster */}
-      <View style={styles.posterContainer}>
-        {posterUrl ? (
-          <Image 
-            source={{ uri: posterUrl }} 
-            style={styles.poster}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <MaterialCommunityIcons 
-              name="filmstrip" 
-              size={40} 
-              color={theme.colors.onSurfaceVariant} 
+    <AnimatedPressable onPress={onPress}> {/* Replace TouchableOpacity */}
+      <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+        {/* Poster */}
+        <View style={styles.posterContainer}>
+          {posterUrl ? (
+            <Image 
+              source={{ uri: posterUrl }} 
+              style={styles.poster}
+              resizeMode="cover"
             />
-          </View>
-        )}
-      </View>
-
-      {/* Info */}
-      <View style={styles.info}>
-        <Text 
-          variant="titleMedium" 
-          numberOfLines={2}
-          style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 18 }}
-        >
-          {content.title}
-        </Text>
-        
-        <View style={styles.metadata}>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {content.releaseYear} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
-          </Text>
+          ) : (
+            <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <MaterialCommunityIcons 
+                name="filmstrip" 
+                size={40} 
+                color={theme.colors.onSurfaceVariant} 
+              />
+            </View>
+          )}
         </View>
 
-        {/* Rating */}
-        {rating && (
-          <View style={styles.rating}>
-            <MaterialCommunityIcons 
-              name="star" 
-              size={16} 
-              color={theme.colors.primary} 
-            />
-            <Text 
-              variant="bodyMedium" 
-              style={{ color: theme.colors.primary, marginLeft: 4, fontWeight: 'bold' }}
-            >
-              {rating}/10
+        {/* Info */}
+        <View style={styles.info}>
+          <Text 
+            variant="titleMedium" 
+            numberOfLines={2}
+            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 18 }}
+          >
+            {content.title}
+          </Text>
+          
+          <View style={styles.metadata}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {content.releaseYear} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
             </Text>
           </View>
-        )}
 
-        {/* Watch Date */}
-        <Text 
-          variant="bodySmall" 
-          style={{ color: theme.colors.onSurfaceVariant, marginTop: 4, fontFamily: 'VT323_400Regular' }}
-        >
-          Watched: {watchDate}
-        </Text>
+          {/* Rating */}
+          {rating && (
+            <View style={styles.rating}>
+              <MaterialCommunityIcons 
+                name="star" 
+                size={16} 
+                color={theme.colors.primary} 
+              />
+              <Text 
+                variant="bodyMedium" 
+                style={{ color: theme.colors.primary, marginLeft: 4, fontWeight: 'bold' }}
+              >
+                {rating}/10
+              </Text>
+            </View>
+          )}
+
+          {/* Watch Date */}
+          <Text 
+            variant="bodySmall" 
+            style={{ color: theme.colors.onSurfaceVariant, marginTop: 4, fontFamily: 'VT323_400Regular' }}
+          >
+            Watched: {watchDate}
+          </Text>
+        </View>
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

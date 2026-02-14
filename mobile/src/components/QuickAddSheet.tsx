@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, useTheme, Button, TextInput } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useRef, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Animated,
+} from "react-native";
+import { Text, useTheme, Button, TextInput } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { haptics } from "../utils/haptics";
 
 interface QuickAddSheetProps {
   visible: boolean;
@@ -10,27 +20,61 @@ interface QuickAddSheetProps {
   movieTitle: string;
 }
 
-export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }: QuickAddSheetProps) {
+export default function QuickAddSheet({
+  visible,
+  onClose,
+  onSubmit,
+  movieTitle,
+}: QuickAddSheetProps) {
   const theme = useTheme();
   const [rating, setRating] = useState<number | null>(null);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
 
   const handleSubmit = () => {
     onSubmit(rating, notes);
     // Reset
     setRating(null);
-    setNotes('');
+    setNotes("");
   };
 
-  const StarButton = ({ value }: { value: number }) => (
-    <TouchableOpacity onPress={() => setRating(value)}>
-      <MaterialCommunityIcons
-        name={rating && rating >= value ? 'star' : 'star-outline'}
-        size={36}
-        color={rating && rating >= value ? theme.colors.primary : theme.colors.onSurfaceVariant}
-      />
-    </TouchableOpacity>
-  );
+  const StarButton = ({ value }: { value: number }) => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePress = () => {
+      setRating(value);
+      haptics.light();
+
+      // Animate star
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          bounciness: 10,
+        }),
+      ]).start();
+    };
+
+    return (
+      <TouchableOpacity onPress={handlePress}>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <MaterialCommunityIcons
+            name={rating && rating >= value ? "star" : "star-outline"}
+            size={36}
+            color={
+              rating && rating >= value
+                ? theme.colors.primary
+                : theme.colors.onSurfaceVariant
+            }
+          />
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Modal
@@ -39,54 +83,58 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
       transparent
       onRequestClose={onClose}
     >
-      <TouchableOpacity 
-        style={styles.overlay} 
-        activeOpacity={1} 
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
         onPress={onClose}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.avoidingView}
         >
-          <TouchableOpacity 
-            activeOpacity={1} 
+          <TouchableOpacity
+            activeOpacity={1}
             style={[styles.sheet, { backgroundColor: theme.colors.surface }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <ScrollView 
+            <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.scrollContent}
             >
               {/* Header */}
               <View style={styles.header}>
-                <Text 
-                  variant="titleLarge" 
-                  style={{ 
-                    color: theme.colors.onSurface, 
-                    fontFamily: 'BebasNeue_400Regular', 
+                <Text
+                  variant="titleLarge"
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontFamily: "BebasNeue_400Regular",
                     fontSize: 20,
                     flex: 1,
-                    paddingRight: 8
+                    paddingRight: 8,
                   }}
                   numberOfLines={2}
                 >
                   LOG: {movieTitle}
                 </Text>
                 <TouchableOpacity onPress={onClose}>
-                  <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={24}
+                    color={theme.colors.onSurface}
+                  />
                 </TouchableOpacity>
               </View>
 
               {/* Rating */}
               <View style={styles.section}>
-                <Text 
-                  variant="titleSmall" 
-                  style={{ 
-                    color: theme.colors.onSurface, 
-                    marginBottom: 12, 
-                    fontFamily: 'VT323_400Regular', 
-                    fontSize: 16 
+                <Text
+                  variant="titleSmall"
+                  style={{
+                    color: theme.colors.onSurface,
+                    marginBottom: 12,
+                    fontFamily: "VT323_400Regular",
+                    fontSize: 16,
                   }}
                 >
                   RATING (OPTIONAL)
@@ -97,13 +145,15 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
                   ))}
                 </View>
                 {rating && (
-                  <Text style={{ 
-                    color: theme.colors.primary, 
-                    marginTop: 8, 
-                    textAlign: 'center', 
-                    fontSize: 18, 
-                    fontWeight: 'bold' 
-                  }}>
+                  <Text
+                    style={{
+                      color: theme.colors.primary,
+                      marginTop: 8,
+                      textAlign: "center",
+                      fontSize: 18,
+                      fontWeight: "bold",
+                    }}
+                  >
                     {rating}/10
                   </Text>
                 )}
@@ -111,13 +161,13 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
 
               {/* Notes */}
               <View style={styles.section}>
-                <Text 
-                  variant="titleSmall" 
-                  style={{ 
-                    color: theme.colors.onSurface, 
-                    marginBottom: 8, 
-                    fontFamily: 'VT323_400Regular', 
-                    fontSize: 16 
+                <Text
+                  variant="titleSmall"
+                  style={{
+                    color: theme.colors.onSurface,
+                    marginBottom: 8,
+                    fontFamily: "VT323_400Regular",
+                    fontSize: 16,
                   }}
                 >
                   YOUR THOUGHTS (OPTIONAL)
@@ -146,7 +196,11 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
                   style={styles.submitButton}
                   buttonColor={theme.colors.primary}
                   textColor={theme.colors.onPrimary}
-                  labelStyle={{ fontFamily: 'BebasNeue_400Regular', fontSize: 16, letterSpacing: 1 }}
+                  labelStyle={{
+                    fontFamily: "BebasNeue_400Regular",
+                    fontSize: 16,
+                    letterSpacing: 1,
+                  }}
                 >
                   ADD TO COLLECTION
                 </Button>
@@ -154,7 +208,7 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
                   mode="text"
                   onPress={onClose}
                   textColor={theme.colors.onSurfaceVariant}
-                  labelStyle={{ fontFamily: 'VT323_400Regular' }}
+                  labelStyle={{ fontFamily: "VT323_400Regular" }}
                 >
                   Cancel
                 </Button>
@@ -170,24 +224,24 @@ export default function QuickAddSheet({ visible, onClose, onSubmit, movieTitle }
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   avoidingView: {
-    maxHeight: '90%',
+    maxHeight: "90%",
   },
   sheet: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '100%',
+    maxHeight: "100%",
   },
   scrollContent: {
     paddingBottom: 40,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     padding: 20,
     paddingBottom: 16,
   },
@@ -196,12 +250,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   stars: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
   },
   notesInput: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     maxHeight: 120,
   },
   buttons: {

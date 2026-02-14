@@ -5,10 +5,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { VT323_400Regular } from '@expo-google-fonts/vt323';
 import * as SplashScreen from 'expo-splash-screen';
+import Toast from 'react-native-toast-message'; // Add import
 import theme from './src/theme';
 import AppNavigator from './src/navigation/AppNavigator';
 
-// Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -32,6 +32,7 @@ export default function App() {
       <NavigationContainer>
         <AppNavigator />
         <StatusBar style="light" />
+        <Toast />
       </NavigationContainer>
     </PaperProvider>
   );
