@@ -10,7 +10,7 @@ import {
   getWatchEntriesForContent,
 } from '../../../services/watchEntry.service';
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 
 const mockContent = {
   id: 'content-uuid-1',

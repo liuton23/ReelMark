@@ -9,7 +9,7 @@ import {
   getAllUsers,
 } from '../../../services/user.service';
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 
 const mockUser = {
   id: '123e4567-e89b-12d3-a456-426614174000',

@@ -11,7 +11,7 @@ import {
   getAllContent,
 } from '../../../services/content.service';
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 const mockGetMovieDetails = getMovieDetails as jest.MockedFunction<typeof getMovieDetails>;
 const mockGetTVShowDetails = getTVShowDetails as jest.MockedFunction<typeof getTVShowDetails>;
 
