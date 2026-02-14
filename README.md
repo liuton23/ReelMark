@@ -432,7 +432,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 ## 👨‍💻 Author
 
 **[Tong Liu]**  
-📧 your.email@example.com  
+📧 trevor.liu28@gmail.com
 🔗 [LinkedIn](https://www.linkedin.com/in/trevortongliu/)  
 🐙 [GitHub](https://github.com/liuton23)  
 
