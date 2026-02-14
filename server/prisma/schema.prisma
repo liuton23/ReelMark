@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique // Optional for now, required when you add auth
+  username  String   @unique
+  createdAt DateTime @default(now())
+  
+  watchEntries WatchEntry[]
+}
+
+model Content {
+  id          String      @id @default(uuid())
+  tmdbId      Int         @unique
+  type        ContentType
+  title       String
+  releaseYear Int?
+  posterPath  String?
+  genres      String[]
+  overview    String?
+  runtime     Int?
+  
+  // TV-specific fields (null for movies)
+  showType         Int?     // TMDB show type (0-6)
+  numberOfSeasons  Int?
+  numberOfEpisodes Int?
+  episodeRuntime   Int?
+  
+  createdAt   DateTime @default(now())
+  watchEntries WatchEntry[]
+}
+
+enum ContentType {
+  MOVIE
+  TV_SHOW
+}
+
+model WatchEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  watchedAt DateTime @default(now())
+  rating    Int?     // 1-10 scale
+  notes     String?
+  
+  // For TV shows - track specific season/episode if needed
+  season    Int?
+  episode   Int?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, contentId, season, episode]) // Prevent duplicate entries
+}
