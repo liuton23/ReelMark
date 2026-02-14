@@ -10,7 +10,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -58,6 +58,15 @@ export interface RecommendationStatus {
   message: string;
 }
 
+export interface UserStats {
+  totalWatched: number;
+  movies: number;
+  tvShows: number;
+  averageRating: number | null;
+  thisMonth: number;
+  lastMonth: number;
+  favoriteGenre: string | null;
+}
 // API Functions
 export const apiService = {
   // Get watch history for user
@@ -131,6 +140,11 @@ export const apiService = {
     userId: string,
   ): Promise<RecommendationStatus> => {
     const response = await api.get(`/recommendations/status/${userId}`);
+    return response.data;
+  },
+
+  getUserStats: async (userId: string): Promise<UserStats> => {
+    const response = await api.get(`/watch-entries/stats/${userId}`);
     return response.data;
   },
 };

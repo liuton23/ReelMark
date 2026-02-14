@@ -5,6 +5,7 @@ import {
   getWatchEntryById,
   updateWatchEntry,
   deleteWatchEntry,
+  getUserStats,
 } from '../services/watchEntry.service';
 import { saveMovieFromTMDB, saveTVShowFromTMDB } from '../services/content.service';
 
@@ -127,6 +128,17 @@ router.delete('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Route error:', error);
     res.status(500).json({ error: 'Failed to delete watch entry' });
+  }
+});
+
+router.get('/stats/:userId', async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId as string;
+    const stats = await getUserStats(userId);
+    res.json(stats);
+  } catch (error) {
+    console.error('Route error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
 

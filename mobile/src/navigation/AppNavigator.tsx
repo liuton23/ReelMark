@@ -1,37 +1,42 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
-import type { TabParamList, RootStackParamList } from './types';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTheme } from "react-native-paper";
+import type { TabParamList, RootStackParamList } from "./types";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import HomeScreen from '../screens/HomeScreen';
-import SearchScreen from '../screens/SearchScreen';
-import LibraryScreen from '../screens/LibraryScreen';
-import RecommendScreen from '../screens/RecommendScreen';
-import DetailScreen from '../screens/DetailScreen';
+import HomeScreen from "../screens/HomeScreen";
+import SearchScreen from "../screens/SearchScreen";
+import LibraryScreen from "../screens/LibraryScreen";
+import RecommendScreen from "../screens/RecommendScreen";
+import DetailScreen from "../screens/DetailScreen";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
-const TAB_ICONS: Record<keyof TabParamList, { focused: IconName; unfocused: IconName }> = {
-  Home: { focused: 'home', unfocused: 'home-outline' },
-  Search: { focused: 'movie-search', unfocused: 'movie-search-outline' },
-  Library: { focused: 'bookshelf', unfocused: 'bookshelf' },
-  Recommend: { focused: 'lightbulb-on', unfocused: 'lightbulb-on-outline' },
+const TAB_ICONS: Record<
+  keyof TabParamList,
+  { focused: IconName; unfocused: IconName }
+> = {
+  Home: { focused: "home", unfocused: "home-outline" },
+  Search: { focused: "movie-search", unfocused: "movie-search-outline" },
+  Library: { focused: "bookshelf", unfocused: "bookshelf" },
+  Recommend: { focused: "lightbulb-on", unfocused: "lightbulb-on-outline" },
 };
 
 const TAB_LABELS: Record<keyof TabParamList, string> = {
-  Home: 'HOME',
-  Search: 'BROWSE',
-  Library: 'COLLECTION',
-  Recommend: 'CLERK',
+  Home: "HOME",
+  Search: "BROWSE",
+  Library: "COLLECTION",
+  Recommend: "CLERK",
 };
 
 function MainTabs() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -49,11 +54,11 @@ function MainTabs() {
           borderTopColor: theme.colors.outline,
           borderTopWidth: 1,
           paddingTop: 8,
-          paddingBottom: 8,
-          height: 60,
+          paddingBottom: insets.bottom + 8, // Dynamic padding based on device
+          height: 60 + insets.bottom, // Dynamic height
         },
         tabBarLabelStyle: {
-          fontFamily: 'VT323_400Regular',
+          fontFamily: "VT323_400Regular",
           fontSize: 14,
           marginTop: -4,
         },
@@ -64,7 +69,7 @@ function MainTabs() {
         },
         headerTintColor: theme.colors.onSurface,
         headerTitleStyle: {
-          fontFamily: 'BebasNeue_400Regular',
+          fontFamily: "BebasNeue_400Regular",
           fontSize: 24,
           letterSpacing: 2,
         },
@@ -73,25 +78,25 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
-        options={{ headerTitle: 'REELMARK VIDEO' }}
+        options={{ headerTitle: "REELMARK VIDEO" }}
       />
-      <Tab.Screen 
-        name="Search" 
+      <Tab.Screen
+        name="Search"
         component={SearchScreen}
-        options={{ headerTitle: 'BROWSE STORE' }}
+        options={{ headerTitle: "BROWSE STORE" }}
       />
-      <Tab.Screen 
-        name="Library" 
+      <Tab.Screen
+        name="Library"
         component={LibraryScreen}
-        options={{ headerTitle: 'YOUR COLLECTION' }}
+        options={{ headerTitle: "YOUR COLLECTION" }}
       />
-      <Tab.Screen 
-        name="Recommend" 
+      <Tab.Screen
+        name="Recommend"
         component={RecommendScreen}
-        options={{ headerTitle: 'ASK THE CLERK' }}
+        options={{ headerTitle: "ASK THE CLERK" }}
       />
     </Tab.Navigator>
   );
@@ -108,25 +113,25 @@ export default function AppNavigator() {
         },
         headerTintColor: theme.colors.onSurface,
         headerTitleStyle: {
-          fontFamily: 'BebasNeue_400Regular',
-          fontSize: 24
+          fontFamily: "BebasNeue_400Regular",
+          fontSize: 24,
         },
         contentStyle: {
           backgroundColor: theme.colors.background,
         },
       }}
     >
-      <Stack.Screen 
-        name="Main" 
+      <Stack.Screen
+        name="Main"
         component={MainTabs}
         options={{ headerShown: false }}
       />
-      <Stack.Screen 
-        name="Detail" 
+      <Stack.Screen
+        name="Detail"
         component={DetailScreen}
-        options={{ 
-          headerTitle: 'RENTAL CARD',
-          presentation: 'card',
+        options={{
+          headerTitle: "RENTAL CARD",
+          presentation: "card",
         }}
       />
     </Stack.Navigator>
