@@ -87,7 +87,6 @@ IMPORTANT: Return ONLY valid JSON, no additional text or markdown.`;
 
     console.log(`✨ Generated recommendation: ${recommendation.title}`);
     return recommendation;
-
   } catch (error) {
     console.error('Error getting recommendation:', error);
     throw error;

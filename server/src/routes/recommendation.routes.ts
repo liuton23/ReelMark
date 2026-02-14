@@ -24,19 +24,18 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    const recommendations = await getRecommendation(
+    const recommendation = await getRecommendation(
       userId,
       preferences
     );
 
     res.json({
-      recommendations,
-      count: recommendations.length,
+      recommendation
     });
   } catch (error) {
     console.error('Route error:', error);
     res.status(500).json({
-      error: 'Failed to get recommendations',
+      error: 'Failed to get recommendation',
       details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
