@@ -2,7 +2,7 @@
 
 > Your personal video store in your pocket
 
-A full-stack movie and TV tracking app with AI-powered recommendations. Built with modern tech and a nostalgic touch—think retro video store vibes meets Gen Z aesthetics.
+A full-stack movie and TV tracking app with AI-powered recommendations. Built with modern tech and a nostalgic touch—think retro video store vibes meets Gen Z aesthetics. Now with multi-user support and secure authentication.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -14,18 +14,18 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 ## ✨ Features
 
 ### 📱 Mobile App (iOS & Android)
+- **Multi-User Accounts** 🔐 - Secure login/registration so every user has their own private library
 - **Track Your Watches** 🎥 - Log movies and TV shows with personal ratings (1-10) and notes
 - **Smart Search** 🔍 - Browse 600K+ titles via TMDB integration with real-time search
-- **AI Recommendations** 🤖 - Get personalized suggestions from Claude AI based on your taste
+- **AI Recommendations** 🤖 - Get personalized suggestions from Claude AI, now saved to your profile
 - **Beautiful Stats** 📊 - Dashboard with watch counts, monthly activity, favorite genres, and more
 - **Retro Design** 📼 - Dark indie video store theme with custom fonts and smooth animations
-- **Detailed Views** 📝 - See your notes, ratings, and full movie metadata in one place
 
 ### 🔧 Backend API
-- **RESTful Architecture** - Clean, documented endpoints for all operations
+- **Secure Authentication** - Session-based auth with bcrypt password hashing
+- **User Scoping** - All content and watch history is strictly scoped to the authenticated user
 - **TMDB Integration** - Automatic content fetching with posters, metadata, and genre data
-- **Smart Caching** - Content stored locally after first fetch for faster load times
-- **Recommendation Engine** - Eligibility checks, preference support, and Claude AI integration
+- **Persisted Recommendations** - AI suggestions are stored in the database for easy retrieval
 - **Type Safety** - Full TypeScript coverage with Prisma-generated types
 - **Comprehensive Testing** - 125+ tests across unit, integration, and E2E suites
 
@@ -37,92 +37,35 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Runtime**: Node.js 20+ with TypeScript
 - **Framework**: Express.js (REST API)
 - **Database**: PostgreSQL + Prisma ORM
+- **Auth**: Session-based with Bcrypt hashing
 - **AI**: Anthropic Claude API (Sonnet 4)
 - **External Data**: The Movie Database (TMDB) API
-- **Testing**: Jest + Supertest (125 tests, ~90% coverage)
+- **Testing**: Jest + Supertest
 
 ### Mobile
 - **Framework**: React Native + Expo
 - **Language**: TypeScript
 - **UI Library**: React Native Paper (Material Design)
 - **Navigation**: React Navigation (Stack + Tabs)
-- **Fonts**: Bebas Neue, VT323 (retro aesthetic)
-- **Animations**: React Native Reanimated, Haptics
-- **Networking**: Axios with interceptors
-
----
-
-## 📂 Project Structure
-
-```
-ReelMark/
-├── server/                        # Backend API
-│   ├── src/
-│   │   ├── app.ts                # Express app setup
-│   │   ├── index.ts              # Server entry point
-│   │   ├── config/
-│   │   │   └── database.ts       # Prisma client instance
-│   │   ├── services/             # Business logic layer
-│   │   │   ├── user.service.ts
-│   │   │   ├── content.service.ts
-│   │   │   ├── watchEntry.service.ts
-│   │   │   ├── tmdb.service.ts
-│   │   │   └── recommendation.service.ts
-│   │   ├── routes/               # API endpoints
-│   │   │   ├── user.routes.ts
-│   │   │   ├── content.routes.ts
-│   │   │   ├── watchEntry.routes.ts
-│   │   │   └── recommendation.routes.ts
-│   │   └── __tests__/            # Test suite
-│   │       ├── unit/             # Mocked service tests
-│   │       ├── integration/      # Route integration tests
-│   │       └── e2e/              # Full API flow tests
-│   ├── prisma/
-│   │   └── schema.prisma         # Database schema
-│   └── package.json
-│
-└── mobile/                        # React Native app
-    ├── src/
-    │   ├── components/           # Reusable UI components
-    │   │   ├── WatchCard.tsx
-    │   │   ├── SearchResultCard.tsx
-    │   │   ├── QuickAddSheet.tsx
-    │   │   ├── RecommendationCard.tsx
-    │   │   ├── StatCard.tsx
-    │   │   └── AnimatedPressable.tsx
-    │   ├── screens/              # Main app screens
-    │   │   ├── HomeScreen.tsx
-    │   │   ├── SearchScreen.tsx
-    │   │   ├── LibraryScreen.tsx
-    │   │   ├── RecommendScreen.tsx
-    │   │   └── DetailScreen.tsx
-    │   ├── navigation/           # Navigation setup
-    │   │   ├── AppNavigator.tsx
-    │   │   └── types.ts
-    │   ├── services/             # API client
-    │   │   └── api.ts
-    │   ├── theme/                # Design system
-    │   │   └── index.ts
-    │   └── utils/
-    │       └── haptics.ts
-    └── App.tsx
-```
+- **Storage**: Expo SecureStore (for auth tokens)
+- **Networking**: Axios with auth interceptors
 
 ---
 
 ## 🚀 API Reference
 
-### Users
+### Authentication (New)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/users/default` | Get or create default user |
-| `GET` | `/api/users/:id` | Get user by ID |
-| `POST` | `/api/users` | Create new user |
+| `POST` | `/api/auth/register` | Create account (username, email, password) |
+| `POST` | `/api/auth/login` | Login and receive session token |
+| `POST` | `/api/auth/logout` | Invalidate current session |
+| `GET`  | `/api/auth/me` | Get current authenticated user details |
 
 ### Content
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/content` | Get all content in library |
+| `GET` | `/api/content` | Get **your** library (content you have watched) |
 | `GET` | `/api/content/:id` | Get content by ID |
 | `GET` | `/api/content/tmdb/:tmdbId` | Look up content by TMDB ID |
 | `POST` | `/api/content/movie` | Save movie from TMDB (auto-fetch metadata) |
@@ -131,9 +74,9 @@ ReelMark/
 ### Watch Entries
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/watch-entries` | Create watch entry (auto-creates content if needed) |
-| `GET` | `/api/watch-entries/user/:userId` | Get user's watch history |
-| `GET` | `/api/watch-entries/stats/:userId` | Get user statistics |
+| `POST` | `/api/watch-entries` | Create watch entry for **current user** |
+| `GET` | `/api/watch-entries` | Get **current user's** watch history |
+| `GET` | `/api/watch-entries/stats` | Get **current user's** statistics |
 | `GET` | `/api/watch-entries/:id` | Get specific entry |
 | `PATCH` | `/api/watch-entries/:id` | Update rating/notes |
 | `DELETE` | `/api/watch-entries/:id` | Delete entry |
@@ -141,8 +84,9 @@ ReelMark/
 ### Recommendations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/recommendations` | Get AI recommendation (requires 5+ watches) |
-| `GET` | `/api/recommendations/status/:userId` | Check eligibility status |
+| `POST` | `/api/recommendations` | Generate & save AI recommendation |
+| `GET` | `/api/recommendations` | Get **your** past recommendations |
+| `GET` | `/api/recommendations/status` | Check eligibility status |
 
 ### Search
 | Method | Endpoint | Description |
@@ -158,17 +102,45 @@ ReelMark/
 
 ## 🗄️ Database Schema
 
-```typescript
-User {
-  id          String   @id @default(uuid())
-  username    String   @unique
-  email       String?  @unique
-  createdAt   DateTime @default(now())
-  
-  watchEntries WatchEntry[]
+```prisma
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  email        String?   @unique
+  passwordHash String    // stored as bcrypt hash
+  displayName  String?
+  avatarUrl    String?
+  createdAt    DateTime  @default(now())
+
+  watchEntries   WatchEntry[]
+  sessions       Session[]
+  recommendations Recommendation[]
 }
 
-Content {
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Recommendation {
+  id           String   @id @default(uuid())
+  userId       String
+  contentId    String?  // Optional link to Content
+  title        String
+  reason       String
+  tmdbId       Int?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      Content? @relation(fields: [contentId], references: [id])
+}
+
+model Content {
   id               String      @id @default(uuid())
   tmdbId           Int         @unique
   type             ContentType // MOVIE | TV_SHOW
@@ -177,32 +149,25 @@ Content {
   posterPath       String?
   genres           String[]
   overview         String?
-  runtime          Int?
   
   // TV-specific
   numberOfSeasons  Int?
   numberOfEpisodes Int?
-  episodeRuntime   Int?
-  showType         Int?
   
   createdAt        DateTime @default(now())
   watchEntries     WatchEntry[]
+  recommendations  Recommendation[]
 }
 
-WatchEntry {
+model WatchEntry {
   id         String   @id @default(uuid())
   userId     String
   contentId  String
   watchedAt  DateTime @default(now())
   rating     Int?     // 1-10 scale
   notes      String?
-  
-  // TV episode tracking
   season     Int?
   episode    Int?
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
   
   user       User     @relation(...)
   content    Content  @relation(...)
@@ -210,28 +175,6 @@ WatchEntry {
   @@unique([userId, contentId, season, episode])
 }
 ```
-
----
-
-## 🧪 Testing
-
-Comprehensive test suite with **125 tests** across three layers:
-
-```bash
-npm test                  # Run all tests
-npm run test:unit         # Unit tests (services, mocked dependencies)
-npm run test:integration  # Route tests (supertest + mocked services)
-npm run test:e2e          # E2E tests (real database flows)
-npm run test:coverage     # Coverage report (~90%)
-```
-
-**Test Coverage:**
-- ✅ All 5 services fully tested with mocked dependencies
-- ✅ All 4 route files tested via supertest
-- ✅ E2E user journeys (search → add → rate → recommend)
-- ✅ Edge cases, error handling, and validation
-
----
 
 ## 💻 Getting Started
 
@@ -365,21 +308,22 @@ Clean separation enables easy testing, swapping implementations, and scaling.
 - [x] PostgreSQL database with Prisma ORM
 - [x] TMDB integration (search, metadata, posters)
 - [x] AI-powered recommendations with Claude
-- [x] Comprehensive test suite (125 tests)
-- [x] Mobile app UI (5 screens)
+- [x] Mobile app UI (6 screens)
 - [x] Stats dashboard with monthly activity tracking
 - [x] Search with quick-add functionality
 - [x] Detail views with ratings and notes
 - [x] Animations and haptic feedback
-- [x] Dark theme with retro design system
+- [x] Light theme with retro design system
+- [x] Multi-user support with authentication
 
 ### 🚧 In Progress
+- [ ] Update Backend Test
+- [ ] Add Frontend Test
 - [ ] Edit functionality (update rating/notes)
 - [ ] Entertainment news integration
 - [ ] Loading skeletons for better perceived performance
 
 ### 📅 Planned
-- [ ] Multi-user support with authentication
 - [ ] Social features (friends, shared watchlists)
 - [ ] Advanced stats (genre breakdowns, watch streaks, yearly recaps)
 - [ ] Export data (CSV, JSON)
