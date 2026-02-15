@@ -1,37 +1,36 @@
-import { MD3DarkTheme } from 'react-native-paper';
+import { MD3LightTheme } from 'react-native-paper';
 
 const theme = {
-  ...MD3DarkTheme,
+  ...MD3LightTheme,
   colors: {
-    ...MD3DarkTheme.colors,
-    // Dark Indie Video Store Palette
-    primary: '#E67E22',           // Burnt orange (main accent - pops on dark)
-    primaryContainer: '#A04000',  // Darker orange for containers
-    secondary: '#52BE80',         // Forest green (secondary accent)
-    secondaryContainer: '#27AE60',
-    background: '#1A0F0A',        // Deep dark brown (main bg)
-    surface: '#2C1810',           // Dark chocolate brown (cards/surfaces)
-    surfaceVariant: '#3D2415',    // Medium brown for variants
+    ...MD3LightTheme.colors,
+    // Bright Cream Retro Video Store Palette
+    primary: '#D35400',           // Burnt orange (main accent)
+    primaryContainer: '#F5A623',  // Warm amber for containers
+    secondary: '#3E8E5E',         // Muted forest green
+    secondaryContainer: '#A8D8B9',
+    background: '#FFF6EC',        // Bright warm cream (main bg)
+    surface: '#FFF0E0',           // Soft peach cream (cards/surfaces)
+    surfaceVariant: '#F5E1CC',    // Warm beige for variants
     onPrimary: '#FFFFFF',         // White text on orange
-    onSecondary: '#1A0F0A',       // Dark text on green
-    onBackground: '#F5E6D3',      // Warm cream (primary text)
-    onSurface: '#F5E6D3',         // Warm cream
-    onSurfaceVariant: '#D4C5B0',  // Tan (secondary text)
-    outline: '#6B4423',           // Brown (borders/dividers)
-    error: '#E74C3C',             // Warm red for errors
+    onSecondary: '#FFFFFF',       // White text on green
+    onBackground: '#2C1810',      // Dark brown (primary text)
+    onSurface: '#2C1810',         // Dark brown
+    onSurfaceVariant: '#6B4423',  // Medium brown (secondary text)
+    outline: '#D4B896',           // Warm tan (borders/dividers)
+    error: '#C0392B',             // Deep red for errors
     elevation: {
-      ...MD3DarkTheme.colors.elevation,
+      ...MD3LightTheme.colors.elevation,
       level0: 'transparent',
-      level1: '#2C1810',
-      level2: '#3D2415',
-      level3: '#4D2E1A',
-      level4: '#5D3820',
-      level5: '#6B4423',
+      level1: '#FFF0E0',
+      level2: '#F5E1CC',
+      level3: '#EBD2B4',
+      level4: '#E0C39C',
+      level5: '#D4B896',
     },
   },
   fonts: {
-    ...MD3DarkTheme.fonts,
-    // Custom fonts will be added after we install them
+    ...MD3LightTheme.fonts,
   },
 };
 
@@ -53,14 +52,14 @@ export const customTheme = {
   },
   // Retro-specific colors
   retro: {
-    shelfBrown: '#4D2E1A',        // Dark wooden shelf
-    caseShadow: '#00000040',      // Shadow for depth
+    shelfBrown: '#8B6914',        // Warm wooden shelf
+    caseShadow: '#00000015',      // Subtle shadow for depth
     labelYellow: '#F4D03F',       // Vintage label color
-    stampRed: '#E74C3C',          // Red stamp/badge color
-    neonOrange: '#FF6B35',        // Neon sign glow
-    warmGlow: '#FFA500',          // Warm light effect
-    vinylBlack: '#0A0503',        // Deep black for backgrounds
-    paperCream: '#F5E6D3',        // Aged paper color
+    stampRed: '#C0392B',          // Red stamp/badge color
+    neonOrange: '#D35400',        // Warm orange accent
+    warmGlow: '#F5A623',          // Warm amber glow
+    vinylBlack: '#2C1810',        // Dark brown for contrast
+    paperCream: '#FFF6EC',        // Bright cream
   },
 };
 

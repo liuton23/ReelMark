@@ -177,7 +177,7 @@ export default function RecommendScreen() {
                 style={{
                   color: theme.colors.onSurface,
                   marginBottom: 8,
-                  fontFamily: "VT323_400Regular",
+                  fontFamily: "SpaceMono_400Regular",
                   fontSize: 16,
                 }}
               >
@@ -222,7 +222,7 @@ export default function RecommendScreen() {
                   variant="bodyMedium"
                   style={{
                     color: theme.colors.onSurfaceVariant,
-                    fontFamily: "VT323_400Regular",
+                    fontFamily: "SpaceMono_400Regular",
                     fontSize: 16,
                   }}
                 >

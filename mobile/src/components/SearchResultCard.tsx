@@ -69,7 +69,7 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
           </Text>
           
           <View style={styles.metadata}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'VT323_400Regular' }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular' }}>
               {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
             </Text>
           </View>

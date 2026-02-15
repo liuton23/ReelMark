@@ -96,7 +96,7 @@ const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
           }}
           value={query}
           style={{ backgroundColor: theme.colors.surface }}
-          inputStyle={{ fontFamily: 'VT323_400Regular', fontSize: 16 }}
+          inputStyle={{ fontFamily: 'SpaceMono_400Regular', fontSize: 16 }}
           iconColor={theme.colors.primary}
         />
       </View>

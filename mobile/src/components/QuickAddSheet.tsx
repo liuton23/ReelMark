@@ -133,7 +133,7 @@ export default function QuickAddSheet({
                   style={{
                     color: theme.colors.onSurface,
                     marginBottom: 12,
-                    fontFamily: "VT323_400Regular",
+                    fontFamily: "SpaceMono_400Regular",
                     fontSize: 16,
                   }}
                 >
@@ -166,7 +166,7 @@ export default function QuickAddSheet({
                   style={{
                     color: theme.colors.onSurface,
                     marginBottom: 8,
-                    fontFamily: "VT323_400Regular",
+                    fontFamily: "SpaceMono_400Regular",
                     fontSize: 16,
                   }}
                 >
@@ -208,7 +208,7 @@ export default function QuickAddSheet({
                   mode="text"
                   onPress={onClose}
                   textColor={theme.colors.onSurfaceVariant}
-                  labelStyle={{ fontFamily: "VT323_400Regular" }}
+                  labelStyle={{ fontFamily: "SpaceMono_400Regular" }}
                 >
                   Cancel
                 </Button>

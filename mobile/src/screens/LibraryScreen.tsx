@@ -7,16 +7,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Text, useTheme } from "react-native-paper";
-import { apiService, WatchEntry } from "../services/api";
+import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
-
+import { apiService, WatchEntry } from "../services/api";
 import WatchCard from "../components/WatchCard";
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-// Update the component to accept navigation
-import { useNavigation } from "@react-navigation/native";
-const DEFAULT_USER_ID = "572bc43f-b148-4a6a-9ce3-e929b152fa57"; // Your user ID
+const DEFAULT_USER_ID = "572bc43f-b148-4a6a-9ce3-e929b152fa57";
 
 export default function LibraryScreen() {
   const theme = useTheme();
@@ -56,12 +55,7 @@ export default function LibraryScreen() {
   // Loading state
   if (loading) {
     return (
-      <View
-        style={[
-          styles.centerContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.centerContainer, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={{ color: theme.colors.onSurface, marginTop: 16 }}>
           Loading your collection...
@@ -73,29 +67,12 @@ export default function LibraryScreen() {
   // Error state
   if (error) {
     return (
-      <View
-        style={[
-          styles.centerContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
-        <Text
-          style={{
-            color: theme.colors.error,
-            textAlign: "center",
-            paddingHorizontal: 24,
-          }}
-        >
+      <View style={[styles.centerContainer, { backgroundColor: theme.colors.background }]}>
+        <Text style={{ color: theme.colors.error, textAlign: "center", paddingHorizontal: 24 }}>
           {error}
         </Text>
-        <Text
-          style={{
-            color: theme.colors.onSurfaceVariant,
-            marginTop: 8,
-            fontSize: 12,
-          }}
-        >
-          Make sure your backend server is running on http://localhost:3000
+        <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 8, fontSize: 12 }}>
+          Make sure your backend server is running
         </Text>
       </View>
     );
@@ -104,12 +81,7 @@ export default function LibraryScreen() {
   // Empty state
   if (watchHistory.length === 0) {
     return (
-      <View
-        style={[
-          styles.centerContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.centerContainer, { backgroundColor: theme.colors.background }]}>
         <Text
           variant="headlineSmall"
           style={{
@@ -120,9 +92,7 @@ export default function LibraryScreen() {
         >
           YOUR SHELVES ARE EMPTY
         </Text>
-        <Text
-          style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}
-        >
+        <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: "center" }}>
           Start browsing to add movies and shows to your collection
         </Text>
       </View>
@@ -131,9 +101,7 @@ export default function LibraryScreen() {
 
   // List view
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FlatList
         data={watchHistory}
         keyExtractor={(item) => item.id}

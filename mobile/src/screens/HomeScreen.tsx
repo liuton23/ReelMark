@@ -211,7 +211,7 @@ export default function HomeScreen() {
           style={{ 
             color: theme.colors.primary,
             marginTop: 8,
-            fontFamily: 'VT323_400Regular',
+            fontFamily: 'SpaceMono_400Regular',
           }}
         >
           COMING SOON

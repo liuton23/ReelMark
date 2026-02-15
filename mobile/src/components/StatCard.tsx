@@ -36,7 +36,7 @@ export default function StatCard({ icon, label, value, subtitle }: StatCardProps
             variant="bodySmall"
             style={{ 
               color: theme.colors.onSurfaceVariant,
-              fontFamily: 'VT323_400Regular',
+              fontFamily: 'SpaceMono_400Regular',
               fontSize: 14,
             }}
           >

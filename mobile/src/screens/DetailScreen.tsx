@@ -145,7 +145,7 @@ export default function DetailScreen({ route, navigation }: Props) {
             variant="bodyLarge"
             style={{
               color: theme.colors.onSurfaceVariant,
-              fontFamily: "VT323_400Regular",
+              fontFamily: "SpaceMono_400Regular",
             }}
           >
             {content.releaseYear} •{" "}
@@ -167,7 +167,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                 }}
                 textStyle={{
                   color: theme.colors.onSurfaceVariant,
-                  fontFamily: "VT323_400Regular",
+                  fontFamily: "SpaceMono_400Regular",
                   fontSize: 14,
                 }}
               >
@@ -186,7 +186,7 @@ export default function DetailScreen({ route, navigation }: Props) {
               variant="labelLarge"
               style={{
                 color: theme.colors.primary,
-                fontFamily: "VT323_400Regular",
+                fontFamily: "SpaceMono_400Regular",
                 fontSize: 16,
                 marginBottom: 8,
               }}
@@ -219,7 +219,7 @@ export default function DetailScreen({ route, navigation }: Props) {
             variant="labelLarge"
             style={{
               color: theme.colors.onSurfaceVariant,
-              fontFamily: "VT323_400Regular",
+              fontFamily: "SpaceMono_400Regular",
               fontSize: 16,
               marginBottom: 4,
             }}

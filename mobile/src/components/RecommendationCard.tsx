@@ -26,7 +26,7 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
             variant="labelLarge" 
             style={{ 
               color: theme.colors.primary, 
-              fontFamily: 'VT323_400Regular',
+              fontFamily: 'SpaceMono_400Regular',
               fontSize: 14,
               marginLeft: 8
             }}
@@ -54,7 +54,7 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
           variant="bodyMedium" 
           style={{ 
             color: theme.colors.onSurfaceVariant,
-            fontFamily: 'VT323_400Regular',
+            fontFamily: 'SpaceMono_400Regular',
             marginBottom: 16
           }}
         >
@@ -69,7 +69,7 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
           variant="labelMedium"
           style={{ 
             color: theme.colors.primary,
-            fontFamily: 'VT323_400Regular',
+            fontFamily: 'SpaceMono_400Regular',
             fontSize: 14,
             marginBottom: 8,
             marginTop: 16

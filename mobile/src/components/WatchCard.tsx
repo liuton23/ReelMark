@@ -4,7 +4,7 @@ import { Text, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { WatchEntry } from '../services/api';
 import { getTMDBPosterUrl } from '../services/api';
-import AnimatedPressable from './AnimatedPressable'; // Add this import
+import AnimatedPressable from './AnimatedPressable';
 
 interface WatchCardProps {
   entry: WatchEntry;
@@ -23,9 +23,8 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
   });
 
   return (
-    <AnimatedPressable onPress={onPress}> {/* Replace TouchableOpacity */}
+    <AnimatedPressable onPress={onPress}>
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-        {/* Poster */}
         <View style={styles.posterContainer}>
           {posterUrl ? (
             <Image 
@@ -44,7 +43,6 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
           )}
         </View>
 
-        {/* Info */}
         <View style={styles.info}>
           <Text 
             variant="titleMedium" 
@@ -56,11 +54,10 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
           
           <View style={styles.metadata}>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {content.releaseYear} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
+              {content.releaseYear || 'N/A'} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
             </Text>
           </View>
 
-          {/* Rating */}
           {rating && (
             <View style={styles.rating}>
               <MaterialCommunityIcons 
@@ -77,7 +74,6 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
             </View>
           )}
 
-          {/* Watch Date */}
           <Text 
             variant="bodySmall" 
             style={{ color: theme.colors.onSurfaceVariant, marginTop: 4, fontFamily: 'VT323_400Regular' }}

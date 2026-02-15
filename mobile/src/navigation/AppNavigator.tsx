@@ -58,8 +58,8 @@ function MainTabs() {
           height: 60 + insets.bottom, // Dynamic height
         },
         tabBarLabelStyle: {
-          fontFamily: "VT323_400Regular",
-          fontSize: 14,
+          fontFamily: "SpaceMono_400Regular",
+          fontSize: 10,
           marginTop: -4,
         },
         headerStyle: {
