@@ -15,8 +15,6 @@ import WatchCard from "../components/WatchCard";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const DEFAULT_USER_ID = "572bc43f-b148-4a6a-9ce3-e929b152fa57";
-
 export default function LibraryScreen() {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
@@ -28,7 +26,7 @@ export default function LibraryScreen() {
   const fetchWatchHistory = async () => {
     try {
       setError(null);
-      const data = await apiService.getWatchHistory(DEFAULT_USER_ID);
+      const data = await apiService.getWatchHistory();
       setWatchHistory(data);
     } catch (err) {
       console.error("Error fetching watch history:", err);

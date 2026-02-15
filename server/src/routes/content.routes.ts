@@ -2,28 +2,40 @@ import express, { Request, Response } from 'express';
 import { 
   saveMovieFromTMDB, 
   saveTVShowFromTMDB, 
-  getContentById, 
+  getContentByIdForUser, 
   getContentByTmdbId,
-  getAllContent 
+  getAllContentForUser 
 } from '../services/content.service';
 
 const router = express.Router();
 
-// Get all content
+// Get all content in the authenticated user's library
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const content = await getAllContent();
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const content = await getAllContentForUser(userId);
     res.json(content);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch content' });
   }
 });
 
-// Get content by ID
+// Get content by ID (only if user has it in their library)
 router.get('/:id', async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).userId;
     const contentId = req.params.id as string;
-    const content = await getContentById(contentId);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const content = await getContentByIdForUser(contentId, userId);
     
     if (!content) {
       return res.status(404).json({ error: 'Content not found' });
@@ -68,7 +80,7 @@ router.post('/tv', async (req: Request, res: Response) => {
   }
 });
 
-// Check if content exists by TMDB ID
+// Check if content exists by TMDB ID (global lookup — used during search/add flow)
 router.get('/tmdb/:tmdbId', async (req: Request, res: Response) => {
   try {
     const tmdbId = parseInt(req.params.tmdbId as string);

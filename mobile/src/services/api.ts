@@ -1,10 +1,10 @@
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
 // Replace with your computer's IP address when testing on phone
-// Find it by running 'ipconfig' in PowerShell, look for IPv4 Address
-const API_BASE_URL = "http://10.0.0.121:3000/api"; // Replace X.X with your IP
-// Or if testing on Android emulator: 'http://10.0.2.2:3000/api'
-// Or if testing on iOS simulator: 'http://localhost:3000/api'
+const API_BASE_URL = "http://10.0.0.121:3000/api";
+
+const TOKEN_KEY = "reelmark_auth_token";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +14,59 @@ const api = axios.create({
   },
 });
 
-// Types
+// ─── Token Management ────────────────────────────────────────────
+
+export const saveToken = async (token: string) => {
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
+};
+
+export const getToken = async (): Promise<string | null> => {
+  return await SecureStore.getItemAsync(TOKEN_KEY);
+};
+
+export const removeToken = async () => {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+};
+
+// ─── Axios Interceptor (auto-attach Bearer token) ───────────────
+
+api.interceptors.request.use(async (config) => {
+  const token = await getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auto-logout on 401 responses
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      await removeToken();
+      // The AuthContext will detect this and show the login screen
+    }
+    return Promise.reject(error);
+  },
+);
+
+// ─── Types ───────────────────────────────────────────────────────
+
+export interface User {
+  id: string;
+  username: string;
+  email: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+  createdAt: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+  expiresAt: string;
+}
+
 export interface Content {
   id: string;
   tmdbId: number;
@@ -42,6 +94,7 @@ export interface WatchEntry {
 }
 
 export interface Recommendation {
+  id?: string;
   title: string;
   year: number;
   reason: string;
@@ -67,29 +120,73 @@ export interface UserStats {
   lastMonth: number;
   favoriteGenre: string | null;
 }
-// API Functions
+
+// ─── API Functions ───────────────────────────────────────────────
+
 export const apiService = {
-  // Get watch history for user
-  getWatchHistory: async (userId: string): Promise<WatchEntry[]> => {
-    const response = await api.get(`/watch-entries/user/${userId}`);
+  // ── Auth ──────────────────────────────────────────────────────
+
+  register: async (
+    username: string,
+    password: string,
+    email?: string,
+  ): Promise<AuthResponse> => {
+    const response = await api.post("/auth/register", {
+      username,
+      password,
+      email,
+    });
+    await saveToken(response.data.token);
     return response.data;
   },
 
-  // Get default user
-  getDefaultUser: async () => {
-    const response = await api.get("/users/default");
+  login: async (
+    username: string,
+    password: string,
+  ): Promise<AuthResponse> => {
+    const response = await api.post("/auth/login", { username, password });
+    await saveToken(response.data.token);
     return response.data;
   },
 
-  // Search movies/shows
-  searchMovies: async (query: string) => {
-    const response = await api.get("/search/movies", { params: { q: query } });
+  logout: async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // Even if server call fails, clear local token
+    }
+    await removeToken();
+  },
+
+  getCurrentUser: async (): Promise<User> => {
+    const response = await api.get("/auth/me");
     return response.data;
   },
 
-  // Add watch entry
+  // ── User Profile ──────────────────────────────────────────────
+
+  getProfile: async (): Promise<User> => {
+    const response = await api.get("/users/profile");
+    return response.data;
+  },
+
+  updateProfile: async (data: {
+    displayName?: string;
+    avatarUrl?: string;
+    email?: string;
+  }): Promise<User> => {
+    const response = await api.patch("/users/profile", data);
+    return response.data;
+  },
+
+  // ── Watch History (no more userId in URL) ─────────────────────
+
+  getWatchHistory: async (): Promise<WatchEntry[]> => {
+    const response = await api.get("/watch-entries/history");
+    return response.data;
+  },
+
   addWatchEntry: async (data: {
-    userId: string;
     tmdbId: number;
     contentType: "movie" | "tv";
     rating?: number;
@@ -99,7 +196,6 @@ export const apiService = {
     return response.data;
   },
 
-  // Update watch entry
   updateWatchEntry: async (
     entryId: string,
     data: { rating?: number; notes?: string },
@@ -108,43 +204,48 @@ export const apiService = {
     return response.data;
   },
 
-  // Delete watch entry
   deleteWatchEntry: async (entryId: string) => {
     const response = await api.delete(`/watch-entries/${entryId}`);
     return response.data;
   },
 
-  // Get recommendation
-  getRecommendation: async (
-    userId: string,
-    preferences?: string,
-  ): Promise<RecommendationResponse> => {
-    console.log("API: Calling recommendation endpoint...");
-    try {
-      const response = await api.post("/recommendations", {
-        userId,
-        preferences: preferences || undefined,
-      });
-      console.log("API: Got response:", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error("API: Recommendation call failed:", error.message);
-      if (error.code === "ECONNABORTED") {
-        console.error("API: Request timed out");
-      }
-      throw error;
-    }
-  },
-
-  getRecommendationStatus: async (
-    userId: string,
-  ): Promise<RecommendationStatus> => {
-    const response = await api.get(`/recommendations/status/${userId}`);
+  getUserStats: async (): Promise<UserStats> => {
+    const response = await api.get("/watch-entries/stats");
     return response.data;
   },
 
-  getUserStats: async (userId: string): Promise<UserStats> => {
-    const response = await api.get(`/watch-entries/stats/${userId}`);
+  // ── Content ───────────────────────────────────────────────────
+
+  getContent: async (): Promise<Content[]> => {
+    const response = await api.get("/content");
+    return response.data;
+  },
+
+  // ── Search (public, no auth needed) ───────────────────────────
+
+  searchMovies: async (query: string) => {
+    const response = await api.get("/search/movies", { params: { q: query } });
+    return response.data;
+  },
+
+  // ── Recommendations (no more userId in body/URL) ──────────────
+
+  getRecommendation: async (
+    preferences?: string,
+  ): Promise<RecommendationResponse> => {
+    const response = await api.post("/recommendations", {
+      preferences: preferences || undefined,
+    });
+    return response.data;
+  },
+
+  getRecommendationStatus: async (): Promise<RecommendationStatus> => {
+    const response = await api.get("/recommendations/status");
+    return response.data;
+  },
+
+  getRecommendationHistory: async (): Promise<Recommendation[]> => {
+    const response = await api.get("/recommendations/history");
     return response.data;
   },
 };

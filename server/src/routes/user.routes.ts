@@ -1,46 +1,68 @@
 import express, { Request, Response } from 'express';
-import { createUser, getUserById, getOrCreateDefaultUser } from '../services/user.service';
+import { getUserById, updateProfile, deleteUser } from '../services/user.service';
 
 const router = express.Router();
 
-// Get or create default user
-router.get('/default', async (req: Request, res: Response) => {
+// Get your own profile
+// (GET /auth/me is the primary way — this is here if you need to fetch by ID)
+router.get('/profile', async (req: Request, res: Response) => {
   try {
-    const user = await getOrCreateDefaultUser();
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to get/create default user' });
-  }
-});
+    const userId = req.userId;
 
-// Get user by ID
-router.get('/:id', async (req: Request, res: Response) => {
-  try {
-    const user = await getUserById(req.params.id as string);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = await getUserById(userId);
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+    res.status(500).json({ error: 'Failed to fetch profile' });
   }
 });
 
-// Create new user (for future multi-user)
-router.post('/', async (req: Request, res: Response) => {
+// Update your profile
+router.patch('/profile', async (req: Request, res: Response) => {
   try {
-    const { username, email } = req.body;
-    if (!username) {
-      return res.status(400).json({ error: 'Username is required' });
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
     }
-    
-    const user = await createUser(username, email);
-    res.status(201).json(user);
-  } catch (error: any) {
-    if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'Username already exists' });
+
+    const { displayName, avatarUrl, email } = req.body;
+
+    const user = await updateProfile(userId, { displayName, avatarUrl, email });
+
+    res.json(user);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Email already in use') {
+      return res.status(409).json({ error: error.message });
     }
-    res.status(500).json({ error: 'Failed to create user' });
+    console.error('Route error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Delete your account
+router.delete('/profile', async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    await deleteUser(userId);
+
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Route error:', error);
+    res.status(500).json({ error: 'Failed to delete account' });
   }
 });
 

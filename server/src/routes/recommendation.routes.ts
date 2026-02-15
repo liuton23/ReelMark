@@ -1,16 +1,18 @@
 import express, { Request, Response } from 'express';
-import { canGetRecommendations, getRecommendation, getRemainingWatchesNeeded } from '../services/recommendation.service';
+import { canGetRecommendations, getRecommendation, getRemainingWatchesNeeded, getUserRecommendations } from '../services/recommendation.service';
 
 const router = express.Router();
 
-// Get recommendations for a user
+// Get a new recommendation for the authenticated user
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { userId, preferences} = req.body;
+    const userId = (req as any).userId;
 
     if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
+      return res.status(401).json({ error: 'Authentication required' });
     }
+
+    const { preferences } = req.body;
 
     // Check if user has enough watch history
     const canRecommend = await canGetRecommendations(userId);
@@ -24,14 +26,9 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    const recommendation = await getRecommendation(
-      userId,
-      preferences
-    );
+    const recommendation = await getRecommendation(userId, preferences);
 
-    res.json({
-      recommendation
-    });
+    res.json({ recommendation });
   } catch (error) {
     console.error('Route error:', error);
     res.status(500).json({
@@ -41,10 +38,33 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/status/:userId', async (req: Request, res: Response) => {
+// Get past recommendations for the authenticated user
+router.get('/history', async (req: Request, res: Response) => {
   try {
-    const userId = req.params.userId as string;
-    
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const recommendations = await getUserRecommendations(userId);
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Route error:', error);
+    res.status(500).json({ error: 'Failed to fetch recommendation history' });
+  }
+});
+
+// Check recommendation eligibility for the authenticated user
+// Changed from /status/:userId to /status
+router.get('/status', async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
     const canRecommend = await canGetRecommendations(userId);
     const remaining = await getRemainingWatchesNeeded(userId);
 

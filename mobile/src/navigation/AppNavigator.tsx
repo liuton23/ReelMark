@@ -1,11 +1,14 @@
 import React from "react";
+import { ActivityIndicator, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "react-native-paper";
 import type { TabParamList, RootStackParamList } from "./types";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
 
+import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
 import SearchScreen from "../screens/SearchScreen";
 import LibraryScreen from "../screens/LibraryScreen";
@@ -44,7 +47,9 @@ function MainTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           const icons = TAB_ICONS[route.name];
           const iconName = focused ? icons.focused : icons.unfocused;
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          return (
+            <MaterialCommunityIcons name={iconName} size={size} color={color} />
+          );
         },
         tabBarLabel: TAB_LABELS[route.name],
         tabBarActiveTintColor: theme.colors.primary,
@@ -54,8 +59,8 @@ function MainTabs() {
           borderTopColor: theme.colors.outline,
           borderTopWidth: 1,
           paddingTop: 8,
-          paddingBottom: insets.bottom + 8, // Dynamic padding based on device
-          height: 60 + insets.bottom, // Dynamic height
+          paddingBottom: insets.bottom + 8,
+          height: 60 + insets.bottom,
         },
         tabBarLabelStyle: {
           fontFamily: "SpaceMono_400Regular",
@@ -104,6 +109,23 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const theme = useTheme();
+  const { isLoading, isAuthenticated } = useAuth();
+
+  // Show loading spinner while checking stored token
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <Stack.Navigator
@@ -121,19 +143,29 @@ export default function AppNavigator() {
         },
       }}
     >
-      <Stack.Screen
-        name="Main"
-        component={MainTabs}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Detail"
-        component={DetailScreen}
-        options={{
-          headerTitle: "RENTAL CARD",
-          presentation: "card",
-        }}
-      />
+      {isAuthenticated ? (
+        <>
+          <Stack.Screen
+            name="Main"
+            component={MainTabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Detail"
+            component={DetailScreen}
+            options={{
+              headerTitle: "RENTAL CARD",
+              presentation: "card",
+            }}
+          />
+        </>
+      ) : (
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+      )}
     </Stack.Navigator>
   );
 }

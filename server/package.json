@@ -20,11 +20,13 @@
     "@anthropic-ai/sdk": "^0.74.0",
     "@prisma/client": "^6.19.2",
     "axios": "^1.13.5",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",

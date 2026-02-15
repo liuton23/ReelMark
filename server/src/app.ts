@@ -2,10 +2,12 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { searchMovies } from './services/tmdb.service';
+import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import contentRoutes from './routes/content.routes';
 import watchEntryRoutes from './routes/watchEntry.routes';
 import recommendationRoutes from './routes/recommendation.routes';
+import { authenticate } from './middleware/auth.middleware';
 
 dotenv.config();
 
@@ -15,18 +17,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/watch-entries', watchEntryRoutes)
-app.use('/api/recommendations', recommendationRoutes);
-
-// Health check
+// Health check (public)
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'ReelMark API is running' });
 });
 
-// Test TMDB search
+// Public routes
+app.use('/api/auth', authRoutes);
+
+// TMDB search (public — users need to search before logging in to see what the app offers)
 app.get('/api/search/movies', async (req: Request, res: Response) => {
   try {
     const query = req.query.q as string;
@@ -40,5 +39,11 @@ app.get('/api/search/movies', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to search movies' });
   }
 });
+
+// Protected routes (all require valid session token)
+app.use('/api/users', authenticate, userRoutes);
+app.use('/api/content', authenticate, contentRoutes);
+app.use('/api/watch-entries', authenticate, watchEntryRoutes);
+app.use('/api/recommendations', authenticate, recommendationRoutes);
 
 export default app;

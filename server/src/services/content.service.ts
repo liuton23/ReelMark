@@ -2,7 +2,7 @@ import { prisma } from '../config/database';
 import { ContentType } from '@prisma/client';
 import { getMovieDetails, getTVShowDetails } from './tmdb.service';
 
-// Get content by TMDB ID
+// Get content by TMDB ID (internal — used for cache lookups before saving)
 export const getContentByTmdbId = async (tmdbId: number) => {
   try {
     const content = await prisma.content.findUnique({
@@ -15,7 +15,7 @@ export const getContentByTmdbId = async (tmdbId: number) => {
   }
 };
 
-// Get content by ID
+// Get content by ID (internal — no user scoping)
 export const getContentById = async (contentId: string) => {
   try {
     const content = await prisma.content.findUnique({
@@ -24,6 +24,24 @@ export const getContentById = async (contentId: string) => {
     return content;
   } catch (error) {
     console.error('Error fetching content by ID:', error);
+    throw error;
+  }
+};
+
+// Get content by ID — only if the user has a watch entry for it
+export const getContentByIdForUser = async (contentId: string, userId: string) => {
+  try {
+    const content = await prisma.content.findFirst({
+      where: {
+        id: contentId,
+        watchEntries: {
+          some: { userId },
+        },
+      },
+    });
+    return content;
+  } catch (error) {
+    console.error('Error fetching content by ID for user:', error);
     throw error;
   }
 };
@@ -103,7 +121,27 @@ export const saveTVShowFromTMDB = async (tmdbId: number) => {
   }
 };
 
-// Get all content (for browsing library)
+// Get all content in a user's library (content they have watch entries for)
+export const getAllContentForUser = async (userId: string) => {
+  try {
+    const content = await prisma.content.findMany({
+      where: {
+        watchEntries: {
+          some: { userId },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return content;
+  } catch (error) {
+    console.error('Error fetching content for user:', error);
+    throw error;
+  }
+};
+
+// Get all content globally (kept for internal/admin use)
 export const getAllContent = async () => {
   try {
     const content = await prisma.content.findMany({

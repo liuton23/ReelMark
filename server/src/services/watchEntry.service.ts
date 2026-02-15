@@ -22,7 +22,7 @@ export const createWatchEntry = async (
         watchedAt: watchedAt || new Date(),
       },
       include: {
-        content: true, // Include the content details in response
+        content: true,
         user: true,
       },
     });
@@ -44,7 +44,7 @@ export const getUserWatchHistory = async (userId: string) => {
         content: true,
       },
       orderBy: {
-        watchedAt: 'desc', // Most recent first
+        watchedAt: 'desc',
       },
     });
     return watchHistory;
@@ -54,11 +54,14 @@ export const getUserWatchHistory = async (userId: string) => {
   }
 };
 
-// Get a specific watch entry by ID
-export const getWatchEntryById = async (entryId: string) => {
+// Get a specific watch entry by ID (scoped to user)
+export const getWatchEntryById = async (entryId: string, userId: string) => {
   try {
-    const entry = await prisma.watchEntry.findUnique({
-      where: { id: entryId },
+    const entry = await prisma.watchEntry.findFirst({
+      where: {
+        id: entryId,
+        userId,
+      },
       include: {
         content: true,
         user: true,
@@ -71,13 +74,23 @@ export const getWatchEntryById = async (entryId: string) => {
   }
 };
 
-// Update a watch entry (edit rating/notes)
+// Update a watch entry (only if owned by user)
 export const updateWatchEntry = async (
   entryId: string,
+  userId: string,
   rating?: number,
   notes?: string
 ) => {
   try {
+    // Verify ownership first
+    const existing = await prisma.watchEntry.findFirst({
+      where: { id: entryId, userId },
+    });
+
+    if (!existing) {
+      return null;
+    }
+
     const updated = await prisma.watchEntry.update({
       where: { id: entryId },
       data: {
@@ -97,9 +110,18 @@ export const updateWatchEntry = async (
   }
 };
 
-// Delete a watch entry
-export const deleteWatchEntry = async (entryId: string) => {
+// Delete a watch entry (only if owned by user)
+export const deleteWatchEntry = async (entryId: string, userId: string) => {
   try {
+    // Verify ownership first
+    const existing = await prisma.watchEntry.findFirst({
+      where: { id: entryId, userId },
+    });
+
+    if (!existing) {
+      return false;
+    }
+
     await prisma.watchEntry.delete({
       where: { id: entryId },
     });
@@ -112,13 +134,13 @@ export const deleteWatchEntry = async (entryId: string) => {
   }
 };
 
-// Get watch entries for specific content
-export const getWatchEntriesForContent = async (contentId: string) => {
+// Get watch entries for specific content (scoped to user)
+export const getWatchEntriesForContent = async (contentId: string, userId: string) => {
   try {
     const entries = await prisma.watchEntry.findMany({
-      where: { contentId },
-      include: {
-        user: true,
+      where: {
+        contentId,
+        userId,
       },
       orderBy: {
         watchedAt: 'desc',

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,58 +8,80 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String?  @unique // Optional for now, required when you add auth
-  username  String   @unique
+  id              String           @id @default(uuid())
+  email           String?          @unique
+  username        String           @unique
+  createdAt       DateTime         @default(now())
+  passwordHash    String
+  displayName     String?
+  avatarUrl       String?
+  recommendations Recommendation[]
+  sessions        Session[]
+  watchEntries    WatchEntry[]
+}
+
+model Session {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  
-  watchEntries WatchEntry[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
 }
 
 model Content {
-  id          String      @id @default(uuid())
-  tmdbId      Int         @unique
-  type        ContentType
-  title       String
-  releaseYear Int?
-  posterPath  String?
-  genres      String[]
-  overview    String?
-  runtime     Int?
-  
-  // TV-specific fields (null for movies)
-  showType         Int?     // TMDB show type (0-6)
+  id               String           @id @default(uuid())
+  tmdbId           Int              @unique
+  type             ContentType
+  title            String
+  releaseYear      Int?
+  posterPath       String?
+  genres           String[]
+  overview         String?
+  runtime          Int?
+  showType         Int?
   numberOfSeasons  Int?
   numberOfEpisodes Int?
   episodeRuntime   Int?
-  
-  createdAt   DateTime @default(now())
-  watchEntries WatchEntry[]
-}
-
-enum ContentType {
-  MOVIE
-  TV_SHOW
+  createdAt        DateTime         @default(now())
+  recommendations  Recommendation[]
+  watchEntries     WatchEntry[]
 }
 
 model WatchEntry {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   contentId String
-  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  
   watchedAt DateTime @default(now())
-  rating    Int?     // 1-10 scale
+  rating    Int?
   notes     String?
-  
-  // For TV shows - track specific season/episode if needed
   season    Int?
   episode   Int?
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  @@unique([userId, contentId, season, episode]) // Prevent duplicate entries
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentId, season, episode])
+}
+
+model Recommendation {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  contentId String?
+  title     String
+  reason    String
+  tmdbId    Int?
+  createdAt DateTime @default(now())
+  content   Content? @relation(fields: [contentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+enum ContentType {
+  MOVIE
+  TV_SHOW
 }

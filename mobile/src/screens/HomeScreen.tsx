@@ -5,8 +5,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { apiService, UserStats } from '../services/api';
 import StatCard from '../components/StatCard';
 
-const DEFAULT_USER_ID = '572bc43f-b148-4a6a-9ce3-e929b152fa57';
-
 export default function HomeScreen() {
   const theme = useTheme();
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -15,7 +13,7 @@ export default function HomeScreen() {
 
   const fetchStats = async () => {
     try {
-      const data = await apiService.getUserStats(DEFAULT_USER_ID);
+      const data = await apiService.getUserStats();
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);

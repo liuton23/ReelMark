@@ -7,8 +7,6 @@ import QuickAddSheet from '../components/QuickAddSheet';
 import { haptics } from '../utils/haptics';
 import Toast from 'react-native-toast-message';
 
-const DEFAULT_USER_ID = '572bc43f-b148-4a6a-9ce3-e929b152fa57';
-
 export default function SearchScreen() {
   const theme = useTheme();
   const [query, setQuery] = useState('');
@@ -53,7 +51,6 @@ const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
   try {
     const contentType = selectedMovie.title ? 'movie' : 'tv';
     await apiService.addWatchEntry({
-      userId: DEFAULT_USER_ID,
       tmdbId: selectedMovie.id,
       contentType,
       rating,

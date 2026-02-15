@@ -1,26 +1,18 @@
 import { prisma } from '../config/database';
 
-// Create a new user
-export const createUser = async (username: string, email?: string) => {
-  try {
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-      },
-    });
-    return user;
-  } catch (error) {
-    console.error('Error creating user:', error);
-    throw error;
-  }
-};
-
-// Get user by ID
+// Get user by ID (excludes passwordHash)
 export const getUserById = async (userId: string) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
     });
     return user;
   } catch (error) {
@@ -29,11 +21,19 @@ export const getUserById = async (userId: string) => {
   }
 };
 
-// Get user by username
+// Get user by username (excludes passwordHash)
 export const getUserByUsername = async (username: string) => {
   try {
     const user = await prisma.user.findUnique({
       where: { username },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
     });
     return user;
   } catch (error) {
@@ -42,27 +42,48 @@ export const getUserByUsername = async (username: string) => {
   }
 };
 
-// Get or create default user (for single-user mode)
-export const getOrCreateDefaultUser = async () => {
-  const defaultUsername = 'default_user';
-  
-  let user = await getUserByUsername(defaultUsername);
-  
-  if (!user) {
-    user = await createUser(defaultUsername);
-    console.log('✨ Created default user:', user.id);
+// Update user profile (only fields the user is allowed to change)
+export const updateProfile = async (
+  userId: string,
+  data: {
+    displayName?: string;
+    avatarUrl?: string;
+    email?: string;
   }
-  
-  return user;
+) => {
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        displayName: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
+    return user;
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      throw new Error('Email already in use');
+    }
+    console.error('Error updating profile:', error);
+    throw error;
+  }
 };
 
-// Get all users (for future multi-user)
-export const getAllUsers = async () => {
+// Delete user account and all associated data (cascades)
+export const deleteUser = async (userId: string) => {
   try {
-    const users = await prisma.user.findMany();
-    return users;
+    // Sessions, WatchEntries, Recommendations cascade on delete
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+    return true;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error deleting user:', error);
     throw error;
   }
 };

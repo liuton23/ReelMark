@@ -16,8 +16,6 @@ import {
 } from "../services/api";
 import RecommendationCard from "../components/RecommendationCard";
 
-const DEFAULT_USER_ID = "572bc43f-b148-4a6a-9ce3-e929b152fa57";
-
 export default function RecommendScreen() {
   const theme = useTheme();
   const [status, setStatus] = useState<RecommendationStatus | null>(null);
@@ -34,7 +32,7 @@ export default function RecommendScreen() {
 
   const fetchStatus = async () => {
     try {
-      const data = await apiService.getRecommendationStatus(DEFAULT_USER_ID);
+      const data = await apiService.getRecommendationStatus();
       setStatus(data);
     } catch (error) {
       console.error("Error fetching status:", error);
@@ -50,7 +48,6 @@ export default function RecommendScreen() {
 
     try {
       const data = await apiService.getRecommendation(
-        DEFAULT_USER_ID,
         preferences.trim() || undefined,
       );
 

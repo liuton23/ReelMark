@@ -8,6 +8,7 @@ export type TabParamList = {
 };
 
 export type RootStackParamList = {
+  login: undefined;
   Main: undefined;
   Detail: {
     entry: WatchEntry;
