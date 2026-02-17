@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   Text,
   StyleSheet,
@@ -6,7 +6,9 @@ import {
   ViewStyle,
   View,
   Animated,
+  Pressable,
 } from "react-native";
+import { haptics } from "../utils/haptics";
 
 interface NeonTextProps {
   children: string;
@@ -16,6 +18,7 @@ interface NeonTextProps {
   intensity?: "low" | "medium" | "high";
   uppercase?: boolean;
   flicker?: boolean;
+  interactive?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
@@ -47,22 +50,51 @@ const GLOW_CONFIGS = {
   },
 };
 
-// Realistic neon flicker pattern — quick dips in brightness
-const createFlickerSequence = (anim: Animated.Value): Animated.CompositeAnimation => {
-  // Random helper for natural variation
-  const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+
+// Rapid burst flicker — like tapping a neon tube
+const triggerBurst = (anim: Animated.Value, onDone?: () => void) => {
+  const flickCount = Math.floor(rand(4, 8));
+  const steps: Animated.CompositeAnimation[] = [];
+
+  for (let i = 0; i < flickCount; i++) {
+    steps.push(
+      Animated.timing(anim, {
+        toValue: rand(0.1, 0.5),
+        duration: rand(30, 70),
+        useNativeDriver: true,
+      }),
+      Animated.timing(anim, {
+        toValue: rand(0.7, 1),
+        duration: rand(30, 80),
+        useNativeDriver: true,
+      }),
+    );
+  }
+
+  // Settle back to full brightness
+  steps.push(
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: rand(80, 150),
+      useNativeDriver: true,
+    }),
+  );
+
+  Animated.sequence(steps).start(() => onDone?.());
+};
+
+// Ambient flicker loop
+const createFlickerSequence = (anim: Animated.Value): { start: () => void; stop: () => void } => {
+  let stopped = false;
 
   const flicker = (): Animated.CompositeAnimation => {
-    // Most of the time: steady glow with subtle breathing
-    // Occasionally: quick flicker dip
     const shouldFlicker = Math.random() < 0.6;
 
     if (shouldFlicker) {
-      // Quick flicker: dip down and snap back
       const dipDepth = rand(0.3, 0.7);
       const dipDuration = rand(40, 100);
       const recoveryDuration = rand(60, 150);
-      // Often double-flicker
       const doubleDip = Math.random() < 0.6;
 
       const sequence = [
@@ -79,7 +111,6 @@ const createFlickerSequence = (anim: Animated.Value): Animated.CompositeAnimatio
       ];
 
       if (doubleDip) {
-        // Triple flicker sometimes
         const tripleDip = Math.random() < 0.3;
         sequence.push(
           Animated.timing(anim, {
@@ -110,7 +141,6 @@ const createFlickerSequence = (anim: Animated.Value): Animated.CompositeAnimatio
         }
       }
 
-      // Shorter pause between flickers
       sequence.push(
         Animated.timing(anim, {
           toValue: 1,
@@ -121,7 +151,6 @@ const createFlickerSequence = (anim: Animated.Value): Animated.CompositeAnimatio
 
       return Animated.sequence(sequence);
     } else {
-      // Faster breathing between flickers
       return Animated.sequence([
         Animated.timing(anim, {
           toValue: rand(0.85, 0.93),
@@ -137,20 +166,22 @@ const createFlickerSequence = (anim: Animated.Value): Animated.CompositeAnimatio
     }
   };
 
-  // Recursively loop
   const loop = (): void => {
+    if (stopped) return;
     flicker().start(({ finished }) => {
-      if (finished) loop();
+      if (finished && !stopped) loop();
     });
   };
 
-  // Return initial kick-off as a composite
   return {
-    start: (callback?: Animated.EndCallback) => {
+    start: () => {
+      stopped = false;
       loop();
     },
-    stop: () => anim.stopAnimation(),
-    reset: () => anim.setValue(1),
+    stop: () => {
+      stopped = true;
+      anim.stopAnimation();
+    },
   };
 };
 
@@ -162,6 +193,7 @@ export default function NeonText({
   intensity = "medium",
   uppercase = false,
   flicker = true,
+  interactive = true,
   style,
   textStyle,
 }: NeonTextProps) {
@@ -169,27 +201,45 @@ export default function NeonText({
   const config = GLOW_CONFIGS[intensity];
   const displayText = uppercase ? children.toUpperCase() : children;
   const flickerAnim = useRef(new Animated.Value(1)).current;
+  const ambientRef = useRef<{ start: () => void; stop: () => void } | null>(null);
+  const burstingRef = useRef(false);
 
   useEffect(() => {
     if (!flicker) return;
 
-    // Small initial delay so it doesn't all start at once
     const delay = Math.random() * 800;
     const timeout = setTimeout(() => {
-      createFlickerSequence(flickerAnim).start();
+      ambientRef.current = createFlickerSequence(flickerAnim);
+      ambientRef.current.start();
     }, delay);
 
     return () => {
       clearTimeout(timeout);
-      flickerAnim.stopAnimation();
+      ambientRef.current?.stop();
     };
   }, [flicker]);
+
+  const handlePress = useCallback(() => {
+    if (!interactive || burstingRef.current) return;
+
+    burstingRef.current = true;
+    haptics.light();
+
+    // Stop ambient, run burst, then resume ambient
+    ambientRef.current?.stop();
+    triggerBurst(flickerAnim, () => {
+      burstingRef.current = false;
+      if (flicker) {
+        ambientRef.current = createFlickerSequence(flickerAnim);
+        ambientRef.current.start();
+      }
+    });
+  }, [interactive, flicker]);
 
   const textShadowOffset = { width: 0, height: 0 };
 
   const content = (
     <View style={[styles.container, style]}>
-      {/* Glow layers rendered behind */}
       {config.layers.map((layer, index) => (
         <Text
           key={index}
@@ -211,7 +261,6 @@ export default function NeonText({
         </Text>
       ))}
 
-      {/* Main text on top */}
       <Text
         style={[
           styles.mainText,
@@ -230,13 +279,17 @@ export default function NeonText({
     </View>
   );
 
-  if (!flicker) return content;
-
-  return (
-    <Animated.View style={{ opacity: flickerAnim }}>
-      {content}
-    </Animated.View>
+  const animatedContent = flicker ? (
+    <Animated.View style={{ opacity: flickerAnim }}>{content}</Animated.View>
+  ) : (
+    content
   );
+
+  if (interactive) {
+    return <Pressable onPress={handlePress}>{animatedContent}</Pressable>;
+  }
+
+  return animatedContent;
 }
 
 const styles = StyleSheet.create({
