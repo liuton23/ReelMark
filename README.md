@@ -315,11 +315,11 @@ Clean separation enables easy testing, swapping implementations, and scaling.
 - [x] Animations and haptic feedback
 - [x] Light theme with retro design system
 - [x] Multi-user support with authentication
+- [x] Edit functionality (update rating/notes)
 
 ### 🚧 In Progress
 - [ ] Update Backend Test
 - [ ] Add Frontend Test
-- [ ] Edit functionality (update rating/notes)
 - [ ] Entertainment news integration
 - [ ] Loading skeletons for better perceived performance
 
