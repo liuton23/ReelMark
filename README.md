@@ -16,10 +16,12 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 ### 📱 Mobile App (iOS & Android)
 - **Multi-User Accounts** 🔐 - Secure login/registration so every user has their own private library
 - **Track Your Watches** 🎥 - Log movies and TV shows with personal ratings (1-10) and notes
-- **Smart Search** 🔍 - Browse 600K+ titles via TMDB integration with real-time search
-- **AI Recommendations** 🤖 - Get personalized suggestions from Claude AI, now saved to your profile
+- **Edit Ratings & Notes** ✏️ - Update your reviews anytime from the detail screen
+- **Smart Search** 🔍 - Browse 600K+ movies and TV shows via TMDB multi-search
+- **AI Recommendations** 🤖 - Get personalized suggestions from Claude AI, saved to your profile
 - **Beautiful Stats** 📊 - Dashboard with watch counts, monthly activity, favorite genres, and more
-- **Retro Design** 📼 - Dark indie video store theme with custom fonts and smooth animations
+- **Neon UI** 💡 - Flickering neon text headers that mimic real vintage signage
+- **Retro Design** 📼 - Indie video store theme with custom fonts and smooth animations
 
 ### 🔧 Backend API
 - **Secure Authentication** - Session-based auth with bcrypt password hashing
@@ -47,8 +49,79 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Language**: TypeScript
 - **UI Library**: React Native Paper (Material Design)
 - **Navigation**: React Navigation (Stack + Tabs)
+- **Fonts**: Tilt Neon, Bebas Neue, SpaceMono (retro aesthetic)
 - **Storage**: Expo SecureStore (for auth tokens)
+- **Animations**: React Native Animated (neon flicker), Reanimated, Haptics
 - **Networking**: Axios with auth interceptors
+
+---
+
+## 📂 Project Structure
+
+```
+ReelMark/
+├── server/                        # Backend API
+│   ├── src/
+│   │   ├── app.ts                # Express app setup
+│   │   ├── index.ts              # Server entry point
+│   │   ├── config/
+│   │   │   └── database.ts       # Prisma client instance
+│   │   ├── middleware/            # Express middleware
+│   │   │   └── auth.middleware.ts # Session token validation
+│   │   ├── services/             # Business logic layer
+│   │   │   ├── auth.service.ts
+│   │   │   ├── user.service.ts
+│   │   │   ├── content.service.ts
+│   │   │   ├── watchEntry.service.ts
+│   │   │   ├── tmdb.service.ts
+│   │   │   └── recommendation.service.ts
+│   │   ├── routes/               # API endpoints
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── user.routes.ts
+│   │   │   ├── content.routes.ts
+│   │   │   ├── watchEntry.routes.ts
+│   │   │   └── recommendation.routes.ts
+│   │   └── __tests__/            # Test suite
+│   │       ├── unit/
+│   │       ├── integration/
+│   │       └── e2e/
+│   ├── prisma/
+│   │   └── schema.prisma         # Database schema
+│   └── package.json
+│
+└── mobile/                        # React Native app
+    ├── .env                       # API URL config (gitignored)
+    ├── App.tsx
+    ├── src/
+    │   ├── context/              # React context providers
+    │   │   └── AuthContext.tsx    # Auth state management
+    │   ├── components/           # Reusable UI components
+    │   │   ├── NeonText.tsx      # Flickering neon text effect
+    │   │   ├── WatchCard.tsx
+    │   │   ├── SearchResultCard.tsx
+    │   │   ├── QuickAddSheet.tsx
+    │   │   ├── RecommendationCard.tsx
+    │   │   ├── StatCard.tsx
+    │   │   └── AnimatedPressable.tsx
+    │   ├── screens/              # Main app screens
+    │   │   ├── LoginScreen.tsx
+    │   │   ├── HomeScreen.tsx
+    │   │   ├── SearchScreen.tsx
+    │   │   ├── LibraryScreen.tsx
+    │   │   ├── RecommendScreen.tsx
+    │   │   ├── ProfileScreen.tsx
+    │   │   └── DetailScreen.tsx
+    │   ├── navigation/           # Navigation setup
+    │   │   ├── AppNavigator.tsx
+    │   │   └── types.ts
+    │   ├── services/             # API client
+    │   │   └── api.ts
+    │   ├── theme/                # Design system
+    │   │   └── index.ts
+    │   └── utils/
+    │       └── haptics.ts
+    └── package.json
+```
 
 ---
 
@@ -257,12 +330,14 @@ model WatchEntry {
 
 **Retro Video Store meets Modern UX**
 
-- **Visual Theme**: Dark indie video store aesthetic with warm browns, burnt orange accents, and cream text
+- **Visual Theme**: Indie video store aesthetic with warm browns, burnt orange accents, and cream text
 - **Typography**: 
+  - Tilt Neon (neon headers) - glowing animated text with realistic flicker effect
   - Bebas Neue (headings) - bold, all-caps video store signage
   - SpaceMono (labels) - retro monospace terminal font
   - System fonts (body) - readable, accessible
 - **Interactions**: 
+  - Flickering neon text that mimics real vintage signage
   - Smooth scale animations on press
   - Haptic feedback for tactile feel
   - Toast notifications instead of alerts
@@ -307,15 +382,19 @@ Clean separation enables easy testing, swapping implementations, and scaling.
 - [x] Backend API with full CRUD operations
 - [x] PostgreSQL database with Prisma ORM
 - [x] TMDB integration (search, metadata, posters)
+- [x] Multi-search for movies and TV shows
 - [x] AI-powered recommendations with Claude
-- [x] Mobile app UI (6 screens)
+- [x] Mobile app UI (7 screens)
 - [x] Stats dashboard with monthly activity tracking
 - [x] Search with quick-add functionality
 - [x] Detail views with ratings and notes
+- [x] Edit ratings and notes from detail screen
 - [x] Animations and haptic feedback
 - [x] Light theme with retro design system
+- [x] Neon text headers with realistic flicker animation
 - [x] Multi-user support with authentication
-- [x] Edit functionality (update rating/notes)
+- [x] Session expiry handling with auto-logout
+- [x] Profile screen with membership card and logout
 
 ### 🚧 In Progress
 - [ ] Update Backend Test
