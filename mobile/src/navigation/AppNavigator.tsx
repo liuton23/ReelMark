@@ -7,6 +7,7 @@ import { useTheme } from "react-native-paper";
 import type { TabParamList, RootStackParamList } from "./types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
+import NeonText from "../components/NeonText";
 
 import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -39,6 +40,12 @@ const TAB_LABELS: Record<keyof TabParamList, string> = {
   Recommend: "CLERK",
   Profile: "MEMBER",
 };
+
+const neonHeader = (title: string) => () => (
+  <NeonText size={23} intensity="medium">
+    {title}
+  </NeonText>
+);
 
 function MainTabs() {
   const theme = useTheme();
@@ -76,40 +83,32 @@ function MainTabs() {
           shadowOpacity: 0,
         },
         headerTintColor: theme.colors.onSurface,
-        headerTitleStyle: {
-          fontFamily: "BebasNeue_400Regular",
-          fontSize: 24,
-          letterSpacing: 2,
-        },
-        contentStyle: {
-          backgroundColor: theme.colors.background,
-        },
       })}
     >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerTitle: "REELMARK VIDEO" }}
+        options={{ headerTitle: neonHeader("ReelMark Video") }}
       />
       <Tab.Screen
         name="Search"
         component={SearchScreen}
-        options={{ headerTitle: "BROWSE STORE" }}
+        options={{ headerTitle: neonHeader("Browse Store") }}
       />
       <Tab.Screen
         name="Library"
         component={LibraryScreen}
-        options={{ headerTitle: "YOUR COLLECTION" }}
+        options={{ headerTitle: neonHeader("Your Collection") }}
       />
       <Tab.Screen
         name="Recommend"
         component={RecommendScreen}
-        options={{ headerTitle: "ASK THE CLERK" }}
+        options={{ headerTitle: neonHeader("Ask the Clerk") }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ headerTitle: "MEMBERSHIP" }}
+        options={{ headerTitle: neonHeader("Membership") }}
       />
     </Tab.Navigator>
   );
@@ -119,7 +118,6 @@ export default function AppNavigator() {
   const theme = useTheme();
   const { isLoading, isAuthenticated } = useAuth();
 
-  // Show loading spinner while checking stored token
   if (isLoading) {
     return (
       <View
@@ -162,7 +160,7 @@ export default function AppNavigator() {
             name="Detail"
             component={DetailScreen}
             options={{
-              headerTitle: "RENTAL CARD",
+              headerTitle: neonHeader("Rental Card"),
               presentation: "card",
             }}
           />

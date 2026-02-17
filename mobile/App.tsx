@@ -4,6 +4,7 @@ import { PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
+import { TiltNeon_400Regular } from '@expo-google-fonts/tilt-neon';
 import * as SplashScreen from 'expo-splash-screen';
 import Toast from 'react-native-toast-message';
 import theme from './src/theme';
@@ -17,6 +18,7 @@ export default function App() {
     BebasNeue_400Regular,
     SpaceMono_400Regular,
     SpaceMono_700Bold,
+    TiltNeon_400Regular,
   });
 
   React.useEffect(() => {

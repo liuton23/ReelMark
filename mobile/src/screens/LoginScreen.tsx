@@ -9,6 +9,7 @@ import {
 import { Text, TextInput, Button, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
+import NeonText from "../components/NeonText";
 import Toast from "react-native-toast-message";
 
 export default function LoginScreen() {
@@ -80,22 +81,17 @@ export default function LoginScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text
-            style={[
-              styles.logo,
-              { color: theme.colors.primary },
-            ]}
+          <NeonText size={56} intensity="high">
+            ReelMark
+          </NeonText>
+          <NeonText
+            size={20}
+            intensity="low"
+            style={{ marginTop: -4 }}
+            textStyle={{ letterSpacing: 12 }}
           >
-            REELMARK
-          </Text>
-          <Text
-            style={[
-              styles.subtitle,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
-            VIDEO
-          </Text>
+            Video
+          </NeonText>
           <Text
             style={[
               styles.tagline,
