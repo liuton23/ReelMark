@@ -5,6 +5,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { TiltNeon_400Regular } from '@expo-google-fonts/tilt-neon';
+import { Righteous_400Regular } from '@expo-google-fonts/righteous';
+import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
+import { PatrickHand_400Regular } from '@expo-google-fonts/patrick-hand';
 import * as SplashScreen from 'expo-splash-screen';
 import Toast from 'react-native-toast-message';
 import theme from './src/theme';
@@ -19,6 +22,9 @@ export default function App() {
     SpaceMono_400Regular,
     SpaceMono_700Bold,
     TiltNeon_400Regular,
+    Righteous_400Regular,
+    PressStart2P_400Regular,
+    PatrickHand_400Regular
   });
 
   React.useEffect(() => {

@@ -122,11 +122,11 @@ export default function SearchScreen() {
         <View style={styles.centerContainer}>
           <Text 
             variant="titleLarge" 
-            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', marginBottom: 8 }}
+            style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', marginBottom: 8 }}
           >
             BROWSE THE STORE
           </Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+          <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular', textAlign: 'center' }}>
             Search for movies and TV shows
           </Text>
         </View>

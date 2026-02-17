@@ -108,8 +108,8 @@ export default function QuickAddSheet({
                   variant="titleLarge"
                   style={{
                     color: theme.colors.onSurface,
-                    fontFamily: "BebasNeue_400Regular",
-                    fontSize: 20,
+                    fontFamily: "Righteous_400Regular",
+                    fontSize: 16,
                     flex: 1,
                     paddingRight: 8,
                   }}
@@ -134,7 +134,7 @@ export default function QuickAddSheet({
                     color: theme.colors.onSurface,
                     marginBottom: 12,
                     fontFamily: "SpaceMono_400Regular",
-                    fontSize: 16,
+                    fontSize: 14,
                   }}
                 >
                   RATING (OPTIONAL)
@@ -167,7 +167,7 @@ export default function QuickAddSheet({
                     color: theme.colors.onSurface,
                     marginBottom: 8,
                     fontFamily: "SpaceMono_400Regular",
-                    fontSize: 16,
+                    fontSize: 14,
                   }}
                 >
                   YOUR THOUGHTS (OPTIONAL)
@@ -180,6 +180,7 @@ export default function QuickAddSheet({
                   multiline
                   numberOfLines={4}
                   style={styles.notesInput}
+                  contentStyle={{ fontFamily: 'PatrickHand_400Regular', fontSize: 16 }}
                   outlineColor={theme.colors.outline}
                   activeOutlineColor={theme.colors.primary}
                   textColor={theme.colors.onSurface}
@@ -197,8 +198,8 @@ export default function QuickAddSheet({
                   buttonColor={theme.colors.primary}
                   textColor={theme.colors.onPrimary}
                   labelStyle={{
-                    fontFamily: "BebasNeue_400Regular",
-                    fontSize: 16,
+                    fontFamily: "Righteous_400Regular",
+                    fontSize: 14,
                     letterSpacing: 1,
                   }}
                 >
@@ -208,7 +209,7 @@ export default function QuickAddSheet({
                   mode="text"
                   onPress={onClose}
                   textColor={theme.colors.onSurfaceVariant}
-                  labelStyle={{ fontFamily: "SpaceMono_400Regular" }}
+                  labelStyle={{ fontFamily: "Righteous_400Regular" }}
                 >
                   Cancel
                 </Button>

@@ -74,8 +74,8 @@ export default function HomeScreen() {
           variant="headlineLarge"
           style={{ 
             color: theme.colors.onSurface,
-            fontFamily: 'BebasNeue_400Regular',
-            fontSize: 36,
+            fontFamily: 'PressStart2P_400Regular',
+            fontSize: 20,
             marginTop: 12,
             letterSpacing: 3,
           }}
@@ -86,6 +86,8 @@ export default function HomeScreen() {
           variant="bodyMedium"
           style={{ 
             color: theme.colors.onSurfaceVariant,
+            fontFamily: 'SpaceMono_400Regular',
+            fontSize: 12,
             marginTop: 4,
           }}
         >
@@ -99,8 +101,8 @@ export default function HomeScreen() {
           variant="titleMedium"
           style={{ 
             color: theme.colors.onSurface,
-            fontFamily: 'BebasNeue_400Regular',
-            fontSize: 20,
+            fontFamily: 'Righteous_400Regular',
+            fontSize: 15,
             marginBottom: 12,
             letterSpacing: 1,
           }}
@@ -154,8 +156,8 @@ export default function HomeScreen() {
           variant="titleMedium"
           style={{ 
             color: theme.colors.onSurface,
-            fontFamily: 'BebasNeue_400Regular',
-            fontSize: 20,
+            fontFamily: 'Righteous_400Regular',
+            fontSize: 15,
             marginBottom: 12,
             letterSpacing: 1,
           }}
@@ -188,7 +190,7 @@ export default function HomeScreen() {
           variant="titleMedium"
           style={{ 
             color: theme.colors.onSurface,
-            fontFamily: 'BebasNeue_400Regular',
+            fontFamily: 'Righteous_400Regular',
             marginTop: 12,
           }}
         >

@@ -31,7 +31,7 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
               marginLeft: 8
             }}
           >
-            THE CLERK RECOMMENDS:
+            The Clerk Recommands:
           </Text>
         </View>
 
@@ -40,7 +40,7 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
           variant="headlineSmall"
           style={{ 
             color: theme.colors.onSurface, 
-            fontFamily: 'BebasNeue_400Regular',
+            fontFamily: "Righteous_400Regular",
             fontSize: 28,
             marginTop: 16,
             marginBottom: 4,
@@ -70,12 +70,12 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
           style={{ 
             color: theme.colors.primary,
             fontFamily: 'SpaceMono_400Regular',
-            fontSize: 14,
+            fontSize: 13,
             marginBottom: 8,
             marginTop: 16
           }}
         >
-          WHY YOU'LL LIKE IT:
+          Why you'll like it:
         </Text>
         <Text 
           variant="bodyMedium"
@@ -96,8 +96,8 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
             labelStyle={{ 
-              fontFamily: 'BebasNeue_400Regular', 
-              fontSize: 16,
+              fontFamily: 'Righteous_400Regular', 
+              fontSize: 13,
               letterSpacing: 1
             }}
             icon="plus-circle"

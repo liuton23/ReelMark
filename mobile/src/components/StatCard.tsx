@@ -26,8 +26,8 @@ export default function StatCard({ icon, label, value, subtitle }: StatCardProps
             variant="headlineMedium"
             style={{ 
               color: theme.colors.onSurface,
-              fontFamily: 'BebasNeue_400Regular',
-              fontSize: 28,
+              fontFamily: 'Righteous_400Regular',
+              fontSize: 20,
             }}
           >
             {value}
@@ -37,7 +37,7 @@ export default function StatCard({ icon, label, value, subtitle }: StatCardProps
             style={{ 
               color: theme.colors.onSurfaceVariant,
               fontFamily: 'SpaceMono_400Regular',
-              fontSize: 14,
+              fontSize: 12,
             }}
           >
             {label}
@@ -47,7 +47,8 @@ export default function StatCard({ icon, label, value, subtitle }: StatCardProps
               variant="bodySmall"
               style={{ 
                 color: theme.colors.primary,
-                fontSize: 12,
+                fontFamily: "SpaceMono_400Regular",
+                fontSize: 10,
                 marginTop: 4,
               }}
             >

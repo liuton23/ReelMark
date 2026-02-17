@@ -63,7 +63,7 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
           <Text 
             variant="titleMedium" 
             numberOfLines={2}
-            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 16 }}
+            style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', fontSize: 16 }}
           >
             {title}
           </Text>

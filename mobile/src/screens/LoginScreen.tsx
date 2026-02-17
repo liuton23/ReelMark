@@ -222,8 +222,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonLabel: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 20,
+    fontFamily: "Righteous_400Regular",
+    fontSize: 18,
     letterSpacing: 2,
   },
   switchButton: {

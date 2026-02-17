@@ -47,13 +47,13 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
           <Text 
             variant="titleMedium" 
             numberOfLines={2}
-            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', fontSize: 18 }}
+            style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', fontSize: 16 }}
           >
             {content.title}
           </Text>
           
           <View style={styles.metadata}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular' }}>
               {content.releaseYear || 'N/A'} • {content.type === 'MOVIE' ? 'Movie' : 'TV Show'}
             </Text>
           </View>
@@ -67,7 +67,7 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
               />
               <Text 
                 variant="bodyMedium" 
-                style={{ color: theme.colors.primary, marginLeft: 4, fontWeight: 'bold' }}
+                style={{ color: theme.colors.primary, marginLeft: 4, fontFamily: 'Righteous_400Regular' }}
               >
                 {rating}/10
               </Text>
@@ -76,7 +76,7 @@ export default function WatchCard({ entry, onPress }: WatchCardProps) {
 
           <Text 
             variant="bodySmall" 
-            style={{ color: theme.colors.onSurfaceVariant, marginTop: 4, fontFamily: 'VT323_400Regular' }}
+            style={{ color: theme.colors.onSurfaceVariant, marginTop: 4, fontFamily: 'SpaceMono_400Regular' }}
           >
             Watched: {watchDate}
           </Text>

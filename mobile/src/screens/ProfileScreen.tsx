@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   displayName: {
-    fontFamily: "BebasNeue_400Regular",
+    fontFamily: "Righteous_400Regular",
     fontSize: 32,
     letterSpacing: 2,
   },
@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   cardTitle: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 20,
+    fontFamily: "Righteous_400Regular",
+    fontSize: 16,
     letterSpacing: 2,
     textAlign: "center",
   },
@@ -221,8 +221,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   logoutLabel: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 18,
+    fontFamily: "Righteous_400Regular",
+    fontSize: 14,
     letterSpacing: 1,
   },
   version: {

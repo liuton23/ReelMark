@@ -109,7 +109,7 @@ export default function RecommendScreen() {
             variant="headlineMedium"
             style={{
               color: theme.colors.onSurface,
-              fontFamily: "BebasNeue_400Regular",
+              fontFamily: "Righteous_400Regular",
               fontSize: 32,
               marginTop: 16,
               textAlign: "center",
@@ -122,6 +122,8 @@ export default function RecommendScreen() {
             variant="bodyMedium"
             style={{
               color: theme.colors.onSurfaceVariant,
+              fontFamily: "SpaceMono_400Regular",
+              fontSize: 12,
               marginTop: 8,
               textAlign: "center",
             }}
@@ -149,7 +151,7 @@ export default function RecommendScreen() {
                 color: theme.colors.onSurface,
                 marginTop: 12,
                 textAlign: "center",
-                fontFamily: "BebasNeue_400Regular",
+                fontFamily: "Righteous_400Regular",
               }}
             >
               WATCH {status.remainingWatchesNeeded} MORE TO UNLOCK
@@ -175,7 +177,7 @@ export default function RecommendScreen() {
                   color: theme.colors.onSurface,
                   marginBottom: 8,
                   fontFamily: "SpaceMono_400Regular",
-                  fontSize: 16,
+                  fontSize: 13,
                 }}
               >
                 WHAT ARE YOU IN THE MOOD FOR? (OPTIONAL)
@@ -203,13 +205,13 @@ export default function RecommendScreen() {
               buttonColor={theme.colors.primary}
               textColor={theme.colors.onPrimary}
               labelStyle={{
-                fontFamily: "BebasNeue_400Regular",
-                fontSize: 18,
+                fontFamily: "Righteous_400Regular",
+                fontSize: 14,
                 letterSpacing: 1,
               }}
               icon="bell-ring"
             >
-              {generating ? "CLERK IS THINKING..." : "RING BELL FOR SERVICE 🔔"}
+              {generating ? "CLERK IS THINKING..." : "RING BELL FOR SERVICE"}
             </Button>
 
             {/* Loading State with Typing Animation */}
@@ -220,7 +222,7 @@ export default function RecommendScreen() {
                   style={{
                     color: theme.colors.onSurfaceVariant,
                     fontFamily: "SpaceMono_400Regular",
-                    fontSize: 16,
+                    fontSize: 13,
                   }}
                 >
                   Analyzing your watch history...

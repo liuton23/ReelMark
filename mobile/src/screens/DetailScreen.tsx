@@ -219,8 +219,8 @@ export default function DetailScreen({ route, navigation }: Props) {
             variant="headlineMedium"
             style={{
               color: theme.colors.onSurface,
-              fontFamily: "BebasNeue_400Regular",
-              fontSize: 32,
+              fontFamily: "Righteous_400Regular",
+              fontSize: 28,
               marginBottom: 8,
             }}
           >
@@ -236,7 +236,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                 fontFamily: "SpaceMono_400Regular",
               }}
             >
-              {content.releaseYear} •{" "}
+              {content.releaseYear} {"• "}
               {content.type === "MOVIE" ? "Movie" : "TV Show"}
               {content.runtime && ` • ${content.runtime} min`}
             </Text>
@@ -292,6 +292,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                   style={{
                     color: theme.colors.primary,
                     marginLeft: 8,
+                    fontFamily: "Righteous_400Regular",
                     fontWeight: "bold",
                   }}
                 >
@@ -341,8 +342,8 @@ export default function DetailScreen({ route, navigation }: Props) {
               variant="titleMedium"
               style={{
                 color: theme.colors.onSurface,
-                fontFamily: "BebasNeue_400Regular",
-                fontSize: 20,
+                fontFamily: "Righteous_400Regular",
+                fontSize: 16,
                 marginBottom: 12,
               }}
             >
@@ -353,6 +354,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                 variant="bodyLarge"
                 style={{
                   color: theme.colors.onSurface,
+                  fontFamily: "PatrickHand_400Regular",
                   lineHeight: 24,
                 }}
               >
@@ -382,8 +384,8 @@ export default function DetailScreen({ route, navigation }: Props) {
                   variant="titleMedium"
                   style={{
                     color: theme.colors.onSurface,
-                    fontFamily: "BebasNeue_400Regular",
-                    fontSize: 20,
+                    fontFamily: "Righteous_400Regular",
+                    fontSize: 16,
                     marginBottom: 12,
                   }}
                 >
@@ -412,8 +414,8 @@ export default function DetailScreen({ route, navigation }: Props) {
                     variant="titleMedium"
                     style={{
                       color: theme.colors.onSurface,
-                      fontFamily: "BebasNeue_400Regular",
-                      fontSize: 20,
+                      fontFamily: "Righteous_400Regular",
+                      fontSize: 16,
                       marginBottom: 12,
                     }}
                   >
@@ -542,6 +544,7 @@ export default function DetailScreen({ route, navigation }: Props) {
               multiline
               numberOfLines={4}
               style={styles.notesInput}
+              contentStyle={{ fontFamily: 'PatrickHand_400Regular', fontSize: 16 }}
               outlineColor={theme.colors.outline}
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
@@ -631,9 +634,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalTitle: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 24,
-    letterSpacing: 2,
+    fontFamily: "Righteous_400Regular",
+    fontSize: 20,
+    letterSpacing: 2
   },
   modalSubtitle: {
     fontFamily: "SpaceMono_400Regular",
@@ -664,8 +667,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   saveButtonLabel: {
-    fontFamily: "BebasNeue_400Regular",
-    fontSize: 18,
+    fontFamily: "Righteous_400Regular",
+    fontSize: 14,
     letterSpacing: 1,
   },
 });

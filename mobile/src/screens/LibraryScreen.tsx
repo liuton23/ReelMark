@@ -84,7 +84,7 @@ export default function LibraryScreen() {
           variant="headlineSmall"
           style={{
             color: theme.colors.onSurface,
-            fontFamily: "BebasNeue_400Regular",
+            fontFamily: "Righteous_400Regular",
             marginBottom: 8,
           }}
         >
