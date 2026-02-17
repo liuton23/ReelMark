@@ -6,12 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
-  Animated,
+  Platform
 } from "react-native";
 import { Text, useTheme, Button, TextInput } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { haptics } from "../utils/haptics";
+import { StarButton } from "./StarButton";
 
 interface QuickAddSheetProps {
   visible: boolean;
@@ -35,45 +34,6 @@ export default function QuickAddSheet({
     // Reset
     setRating(undefined);
     setNotes("");
-  };
-
-  const StarButton = ({ value }: { value: number }) => {
-    const scaleAnim = useRef(new Animated.Value(1)).current;
-
-    const handlePress = () => {
-      setRating(value);
-      haptics.light();
-
-      // Animate star
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.3,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          bounciness: 10,
-        }),
-      ]).start();
-    };
-
-    return (
-      <TouchableOpacity onPress={handlePress}>
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <MaterialCommunityIcons
-            name={rating && rating >= value ? "star" : "star-outline"}
-            size={36}
-            color={
-              rating && rating >= value
-                ? theme.colors.primary
-                : theme.colors.onSurfaceVariant
-            }
-          />
-        </Animated.View>
-      </TouchableOpacity>
-    );
   };
 
   return (
@@ -141,22 +101,9 @@ export default function QuickAddSheet({
                 </Text>
                 <View style={styles.stars}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-                    <StarButton key={value} value={value} />
+                    <StarButton key={value} value={value} rating={rating} setRating={setRating} />
                   ))}
                 </View>
-                {rating && (
-                  <Text
-                    style={{
-                      color: theme.colors.primary,
-                      marginTop: 8,
-                      textAlign: "center",
-                      fontSize: 18,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {rating}/10
-                  </Text>
-                )}
               </View>
 
               {/* Notes */}

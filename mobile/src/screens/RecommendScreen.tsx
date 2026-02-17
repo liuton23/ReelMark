@@ -188,6 +188,7 @@ export default function RecommendScreen() {
                 value={preferences}
                 onChangeText={setPreferences}
                 style={styles.input}
+                contentStyle={{ fontFamily: 'SpaceMono_400Regular', fontSize: 13 }}
                 outlineColor={theme.colors.outline}
                 activeOutlineColor={theme.colors.primary}
                 textColor={theme.colors.onSurface}

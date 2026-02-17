@@ -220,7 +220,7 @@ export default function DetailScreen({ route, navigation }: Props) {
             style={{
               color: theme.colors.onSurface,
               fontFamily: "Righteous_400Regular",
-              fontSize: 28,
+              fontSize: 27,
               marginBottom: 8,
             }}
           >
@@ -230,7 +230,7 @@ export default function DetailScreen({ route, navigation }: Props) {
           {/* Metadata */}
           <View style={styles.metadata}>
             <Text
-              variant="bodyLarge"
+              variant="bodyMedium"
               style={{
                 color: theme.colors.onSurfaceVariant,
                 fontFamily: "SpaceMono_400Regular",
@@ -256,7 +256,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                   textStyle={{
                     color: theme.colors.onSurfaceVariant,
                     fontFamily: "SpaceMono_400Regular",
-                    fontSize: 14,
+                    fontSize: 12,
                   }}
                 >
                   {genre}
@@ -265,7 +265,7 @@ export default function DetailScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          <Divider style={{ marginVertical: 20 }} />
+          <Divider style={{ marginVertical: 10 }} />
 
           {/* Your Rating */}
           {rating ? (
@@ -274,7 +274,7 @@ export default function DetailScreen({ route, navigation }: Props) {
                 variant="labelLarge"
                 style={{
                   color: theme.colors.primary,
-                  fontFamily: "SpaceMono_400Regular",
+                  fontFamily: "Righteous_400Regular",
                   fontSize: 16,
                   marginBottom: 8,
                 }}
@@ -322,19 +322,19 @@ export default function DetailScreen({ route, navigation }: Props) {
               variant="labelLarge"
               style={{
                 color: theme.colors.onSurfaceVariant,
-                fontFamily: "SpaceMono_400Regular",
+                fontFamily: "Righteous_400Regular",
                 fontSize: 16,
                 marginBottom: 4,
               }}
             >
               CHECKED OUT ON
             </Text>
-            <Text variant="bodyLarge" style={{ color: theme.colors.onSurface }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurface, fontFamily: "SpaceMono_400Regular" }}>
               {watchDate}
             </Text>
           </View>
 
-          <Divider style={{ marginVertical: 20 }} />
+          <Divider style={{ marginVertical: 10 }} />
 
           {/* Your Notes */}
           <View style={styles.section}>
@@ -378,7 +378,7 @@ export default function DetailScreen({ route, navigation }: Props) {
           {/* Overview */}
           {content.overview && (
             <>
-              <Divider style={{ marginVertical: 20 }} />
+              <Divider style={{ marginVertical: 10 }} />
               <View style={styles.section}>
                 <Text
                   variant="titleMedium"
@@ -392,9 +392,10 @@ export default function DetailScreen({ route, navigation }: Props) {
                   OVERVIEW
                 </Text>
                 <Text
-                  variant="bodyMedium"
+                  variant="bodySmall"
                   style={{
                     color: theme.colors.onSurfaceVariant,
+                    fontFamily: "SpaceMono_400Regular",
                     lineHeight: 22,
                   }}
                 >
@@ -408,7 +409,7 @@ export default function DetailScreen({ route, navigation }: Props) {
           {content.type === "TV_SHOW" &&
             (content.numberOfSeasons || content.numberOfEpisodes) && (
               <>
-                <Divider style={{ marginVertical: 20 }} />
+                <Divider style={{ marginVertical: 10 }} />
                 <View style={styles.section}>
                   <Text
                     variant="titleMedium"
@@ -416,23 +417,23 @@ export default function DetailScreen({ route, navigation }: Props) {
                       color: theme.colors.onSurface,
                       fontFamily: "Righteous_400Regular",
                       fontSize: 16,
-                      marginBottom: 12,
+                      marginBottom: 10,
                     }}
                   >
                     SERIES INFO
                   </Text>
                   {content.numberOfSeasons && (
                     <Text
-                      variant="bodyMedium"
-                      style={{ color: theme.colors.onSurfaceVariant }}
+                      variant="bodySmall"
+                      style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular" }}
                     >
                       Seasons: {content.numberOfSeasons}
                     </Text>
                   )}
                   {content.numberOfEpisodes && (
                     <Text
-                      variant="bodyMedium"
-                      style={{ color: theme.colors.onSurfaceVariant }}
+                      variant="bodySmall"
+                      style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular" }}
                     >
                       Total Episodes: {content.numberOfEpisodes}
                     </Text>
@@ -606,7 +607,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   ratingRow: {
     flexDirection: "row",
