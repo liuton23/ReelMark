@@ -13,6 +13,7 @@ import HomeScreen from "../screens/HomeScreen";
 import SearchScreen from "../screens/SearchScreen";
 import LibraryScreen from "../screens/LibraryScreen";
 import RecommendScreen from "../screens/RecommendScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 import DetailScreen from "../screens/DetailScreen";
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -28,6 +29,7 @@ const TAB_ICONS: Record<
   Search: { focused: "movie-search", unfocused: "movie-search-outline" },
   Library: { focused: "bookshelf", unfocused: "bookshelf" },
   Recommend: { focused: "lightbulb-on", unfocused: "lightbulb-on-outline" },
+  Profile: { focused: "account-circle", unfocused: "account-circle-outline" },
 };
 
 const TAB_LABELS: Record<keyof TabParamList, string> = {
@@ -35,6 +37,7 @@ const TAB_LABELS: Record<keyof TabParamList, string> = {
   Search: "BROWSE",
   Library: "COLLECTION",
   Recommend: "CLERK",
+  Profile: "MEMBER",
 };
 
 function MainTabs() {
@@ -102,6 +105,11 @@ function MainTabs() {
         name="Recommend"
         component={RecommendScreen}
         options={{ headerTitle: "ASK THE CLERK" }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ headerTitle: "MEMBERSHIP" }}
       />
     </Tab.Navigator>
   );

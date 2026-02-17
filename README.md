@@ -75,17 +75,17 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/watch-entries` | Create watch entry for **current user** |
-| `GET` | `/api/watch-entries` | Get **current user's** watch history |
+| `GET` | `/api/watch-entries/history` | Get **current user's** watch history |
 | `GET` | `/api/watch-entries/stats` | Get **current user's** statistics |
-| `GET` | `/api/watch-entries/:id` | Get specific entry |
-| `PATCH` | `/api/watch-entries/:id` | Update rating/notes |
-| `DELETE` | `/api/watch-entries/:id` | Delete entry |
+| `GET` | `/api/watch-entries/:id` | Get specific entry (ownership enforced) |
+| `PATCH` | `/api/watch-entries/:id` | Update rating/notes (ownership enforced) |
+| `DELETE` | `/api/watch-entries/:id` | Delete entry (ownership enforced) |
 
 ### Recommendations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/recommendations` | Generate & save AI recommendation |
-| `GET` | `/api/recommendations` | Get **your** past recommendations |
+| `GET` | `/api/recommendations/history` | Get **your** past recommendations |
 | `GET` | `/api/recommendations/status` | Check eligibility status |
 
 ### Search
@@ -235,11 +235,11 @@ model WatchEntry {
 
 2. **Configure API endpoint**
    
-   Edit `src/services/api.ts`:
-   ```typescript
-   // Replace with your computer's local IP (find with `ipconfig` or `ifconfig`)
-   const API_BASE_URL = 'http://192.168.X.X:3000/api';
+   Create a `.env` file in the `mobile/` directory:
+   ```env
+   EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
    ```
+   Replace `192.168.X.X` with your computer's local IP (find with `ipconfig` or `ifconfig`).
 
 3. **Start Expo**
    ```bash
@@ -260,7 +260,7 @@ model WatchEntry {
 - **Visual Theme**: Dark indie video store aesthetic with warm browns, burnt orange accents, and cream text
 - **Typography**: 
   - Bebas Neue (headings) - bold, all-caps video store signage
-  - VT323 (labels) - retro monospace terminal font
+  - SpaceMono (labels) - retro monospace terminal font
   - System fonts (body) - readable, accessible
 - **Interactions**: 
   - Smooth scale animations on press

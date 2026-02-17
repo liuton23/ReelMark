@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { apiService, getToken, removeToken, User } from "../services/api";
+import { apiService, getToken, removeToken, onSessionExpired, User } from "../services/api";
+import Toast from "react-native-toast-message";
 
 interface AuthState {
   user: User | null;
@@ -25,6 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check for existing token on app launch
   useEffect(() => {
     checkAuth();
+
+    // Listen for 401s from expired tokens
+    onSessionExpired(() => {
+      setState({ user: null, isLoading: false, isAuthenticated: false });
+      Toast.show({
+        type: "info",
+        text1: "Session expired",
+        text2: "Please sign in again",
+        visibilityTime: 4000,
+      });
+    });
   }, []);
 
   const checkAuth = async () => {

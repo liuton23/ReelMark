@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-// Replace with your computer's IP address when testing on phone
-const API_BASE_URL = "http://10.0.0.121:3000/api";
+// Reads from mobile/.env → EXPO_PUBLIC_API_URL=http://**.**.*.***.3000/api
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
 
 const TOKEN_KEY = "reelmark_auth_token";
 
@@ -38,13 +38,24 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Session expiry event — AuthContext listens for this
+type SessionListener = () => void;
+let sessionExpiredListener: SessionListener | null = null;
+
+export const onSessionExpired = (listener: SessionListener) => {
+  sessionExpiredListener = listener;
+};
+
 // Auto-logout on 401 responses
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    // Skip 401s from login/register (those are just wrong credentials)
+    const isAuthRoute = error.config?.url?.includes("/auth/login") || error.config?.url?.includes("/auth/register");
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       await removeToken();
-      // The AuthContext will detect this and show the login screen
+      sessionExpiredListener?.();
     }
     return Promise.reject(error);
   },

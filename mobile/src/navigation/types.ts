@@ -5,10 +5,11 @@ export type TabParamList = {
   Search: undefined;
   Library: undefined;
   Recommend: undefined;
+  Profile: undefined;
 };
 
 export type RootStackParamList = {
-  login: undefined;
+  Login: undefined;
   Main: undefined;
   Detail: {
     entry: WatchEntry;
