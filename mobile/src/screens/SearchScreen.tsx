@@ -16,7 +16,7 @@ export default function SearchScreen() {
   
   // Quick add sheet
   const [sheetVisible, setSheetVisible] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const handleSearch = async (searchQuery: string) => {
     if (searchQuery.trim().length < 2) {
@@ -29,7 +29,7 @@ export default function SearchScreen() {
     setSearched(true);
     
     try {
-      const data = await apiService.searchMovies(searchQuery);
+      const data = await apiService.searchMulti(searchQuery);
       setResults(data);
     } catch (error) {
       console.error('Search error:', error);
@@ -40,46 +40,46 @@ export default function SearchScreen() {
   };
 
   const handleQuickAdd = (result: any) => {
-    setSelectedMovie(result);
+    setSelectedItem(result);
     setSheetVisible(true);
     Keyboard.dismiss();
   };
 
-const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
-  if (!selectedMovie) return;
+  const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
+    if (!selectedItem) return;
 
-  try {
-    const contentType = selectedMovie.title ? 'movie' : 'tv';
-    await apiService.addWatchEntry({
-      tmdbId: selectedMovie.id,
-      contentType,
-      rating,
-      notes: notes || undefined,
-    });
+    try {
+      // media_type comes from the /search/multi response
+      const contentType = selectedItem.media_type === 'tv' ? 'tv' : 'movie';
+      await apiService.addWatchEntry({
+        tmdbId: selectedItem.id,
+        contentType,
+        rating,
+        notes: notes || undefined,
+      });
 
-    setSheetVisible(false);
-    setSelectedMovie(null);
-    
-    // Replace alert with toast
-    haptics.success();
-    Toast.show({
-      type: 'success',
-      text1: 'Added to Collection!',
-      text2: `${selectedMovie.title || selectedMovie.name} has been logged`,
-      position: 'bottom',
-      visibilityTime: 3000,
-    });
-  } catch (error) {
-    console.error('Error adding entry:', error);
-    haptics.error();
-    Toast.show({
-      type: 'error',
-      text1: 'Failed to Add',
-      text2: 'Please try again',
-      position: 'bottom',
-    });
-  }
-};
+      setSheetVisible(false);
+      setSelectedItem(null);
+      
+      haptics.success();
+      Toast.show({
+        type: 'success',
+        text1: 'Added to Collection!',
+        text2: `${selectedItem.title || selectedItem.name} has been logged`,
+        position: 'bottom',
+        visibilityTime: 3000,
+      });
+    } catch (error) {
+      console.error('Error adding entry:', error);
+      haptics.error();
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to Add',
+        text2: 'Please try again',
+        position: 'bottom',
+      });
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -127,13 +127,13 @@ const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
             BROWSE THE STORE
           </Text>
           <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-            What are you looking for?
+            Search for movies and TV shows
           </Text>
         </View>
       ) : (
         <FlatList
           data={results}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => `${item.media_type}-${item.id}`}
           renderItem={({ item }) => (
             <SearchResultCard
               result={item}
@@ -150,10 +150,10 @@ const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
         visible={sheetVisible}
         onClose={() => {
           setSheetVisible(false);
-          setSelectedMovie(null);
+          setSelectedItem(null);
         }}
         onSubmit={handleSubmitAdd}
-        movieTitle={selectedMovie?.title || selectedMovie?.name || ''}
+        movieTitle={selectedItem?.title || selectedItem?.name || ''}
       />
     </View>
   );

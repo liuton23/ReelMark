@@ -22,6 +22,25 @@ export const searchMovies = async (query: string) => {
   }
 };
 
+// Search for both movies and TV shows
+export const searchMulti = async (query: string) => {
+  try {
+    const response = await axios.get(`${TMDB_BASE_URL}/search/multi`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        query: query,
+      },
+    });
+    // Filter to only movies and TV shows (excludes people, etc.)
+    return response.data.results.filter(
+      (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+    );
+  } catch (error) {
+    console.error('Error searching multi:', error);
+    throw error;
+  }
+};
+
 // Search for TV shows
 export const searchTVShows = async (query: string) => {
   try {

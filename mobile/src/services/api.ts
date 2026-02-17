@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-// Reads from mobile/.env → EXPO_PUBLIC_API_URL=http://**.**.*.***.3000/api
+// Reads from mobile/.env → EXPO_PUBLIC_API_URL=http://10.0.0.121:3000/api
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
 
 const TOKEN_KEY = "reelmark_auth_token";
@@ -234,8 +234,8 @@ export const apiService = {
 
   // ── Search (public, no auth needed) ───────────────────────────
 
-  searchMovies: async (query: string) => {
-    const response = await api.get("/search/movies", { params: { q: query } });
+  searchMulti: async (query: string) => {
+    const response = await api.get("/search/multi", { params: { q: query } });
     return response.data;
   },
 

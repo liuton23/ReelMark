@@ -8,80 +8,92 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String?          @unique
-  username        String           @unique
-  createdAt       DateTime         @default(now())
-  passwordHash    String
-  displayName     String?
-  avatarUrl       String?
-  recommendations Recommendation[]
-  sessions        Session[]
+  id           String   @id @default(uuid())
+  email        String?  @unique
+  username     String   @unique
+  passwordHash String?           // Nullable for now — existing users get backfilled on first login
+  displayName  String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  
   watchEntries    WatchEntry[]
+  sessions        Session[]
+  recommendations Recommendation[]
 }
 
 model Session {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([token])
   @@index([userId])
 }
 
 model Content {
-  id               String           @id @default(uuid())
-  tmdbId           Int              @unique
-  type             ContentType
-  title            String
-  releaseYear      Int?
-  posterPath       String?
-  genres           String[]
-  overview         String?
-  runtime          Int?
-  showType         Int?
+  id          String      @id @default(uuid())
+  tmdbId      Int         @unique
+  type        ContentType
+  title       String
+  releaseYear Int?
+  posterPath  String?
+  genres      String[]
+  overview    String?
+  runtime     Int?
+  
+  // TV-specific fields (null for movies)
+  showType         String?  // TMDB show type (e.g. "Scripted", "Miniseries")
   numberOfSeasons  Int?
   numberOfEpisodes Int?
   episodeRuntime   Int?
-  createdAt        DateTime         @default(now())
-  recommendations  Recommendation[]
-  watchEntries     WatchEntry[]
-}
-
-model WatchEntry {
-  id        String   @id @default(uuid())
-  userId    String
-  contentId String
-  watchedAt DateTime @default(now())
-  rating    Int?
-  notes     String?
-  season    Int?
-  episode   Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, contentId, season, episode])
-}
-
-model Recommendation {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId    String
-  contentId String?
-  title     String
-  reason    String
-  tmdbId    Int?
-  createdAt DateTime @default(now())
-  content   Content? @relation(fields: [contentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([userId])
+  
+  createdAt   DateTime @default(now())
+  watchEntries    WatchEntry[]
+  recommendations Recommendation[]
 }
 
 enum ContentType {
   MOVIE
   TV_SHOW
+}
+
+model WatchEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  watchedAt DateTime @default(now())
+  rating    Int?     // 1-10 scale
+  notes     String?
+  
+  // For TV shows - track specific season/episode if needed
+  season    Int?
+  episode   Int?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, contentId, season, episode]) // Prevent duplicate entries
+}
+
+model Recommendation {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentId String?
+  content   Content? @relation(fields: [contentId], references: [id])
+
+  title     String   // Recommended title from AI
+  reason    String   // Why it was recommended
+  tmdbId    Int?     // TMDB ID if resolved
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

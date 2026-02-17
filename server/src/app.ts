@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { searchMovies } from './services/tmdb.service';
+import { searchMovies, searchMulti } from './services/tmdb.service';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import contentRoutes from './routes/content.routes';
@@ -25,18 +25,18 @@ app.get('/health', (req: Request, res: Response) => {
 // Public routes
 app.use('/api/auth', authRoutes);
 
-// TMDB search (public — users need to search before logging in to see what the app offers)
-app.get('/api/search/movies', async (req: Request, res: Response) => {
+// TMDB search — movies and TV shows
+app.get('/api/search/multi', async (req: Request, res: Response) => {
   try {
     const query = req.query.q as string;
     if (!query) {
       return res.status(400).json({ error: 'Query parameter "q" is required' });
     }
 
-    const results = await searchMovies(query);
+    const results = await searchMulti(query);
     res.json(results);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to search movies' });
+    res.status(500).json({ error: 'Failed to search' });
   }
 });
 

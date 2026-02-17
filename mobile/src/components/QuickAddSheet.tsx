@@ -16,7 +16,7 @@ import { haptics } from "../utils/haptics";
 interface QuickAddSheetProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (rating: number | null, notes: string) => void;
+  onSubmit: (rating: number | undefined, notes: string) => void;
   movieTitle: string;
 }
 
@@ -27,13 +27,13 @@ export default function QuickAddSheet({
   movieTitle,
 }: QuickAddSheetProps) {
   const theme = useTheme();
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState("");
 
   const handleSubmit = () => {
     onSubmit(rating, notes);
     // Reset
-    setRating(null);
+    setRating(undefined);
     setNotes("");
   };
 
