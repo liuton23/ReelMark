@@ -368,13 +368,17 @@ model Recommendation {
 
 ## 📸 Screenshots
 
-| Register                                                          | Login                                                          | Home                                                          | Profile                                                          | Collection                                                          |
-| ----------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
-| <img src="mobile/assets/screenshots/01-register.PNG" width="150"> | <img src="mobile/assets/screenshots/02-login.PNG" width="150"> | <img src="mobile/assets/screenshots/03-home.PNG" width="150"> | <img src="mobile/assets/screenshots/04-profile.PNG" width="150"> | <img src="mobile/assets/screenshots/05-collection.PNG" width="150"> |
+<div align="center">
 
-| Detail                                                          | Browse                                                          | Add Entry                                                          | Recommendations                                               | Result                                                               |
-| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------- |
-| <img src="mobile/assets/screenshots/06-detail.PNG" width="150"> | <img src="mobile/assets/screenshots/07-browse.PNG" width="150"> | <img src="mobile/assets/screenshots/08-add-entry.PNG" width="150"> | <img src="mobile/assets/screenshots/09-recc.PNG" width="150"> | <img src="mobile/assets/screenshots/10-recc-result.PNG" width="150"> |
+|                              Register                              |                              Login                              |                              Home                              |                              Profile                              |                              Collection                              |
+| :----------------------------------------------------------------: | :-------------------------------------------------------------: | :------------------------------------------------------------: | :---------------------------------------------------------------: | :------------------------------------------------------------------: |
+| <img src="mobile/assets/screenshots/01-register.PNG" width="140"/> | <img src="mobile/assets/screenshots/02-login.PNG" width="140"/> | <img src="mobile/assets/screenshots/03-home.PNG" width="140"/> | <img src="mobile/assets/screenshots/04-profile.PNG" width="140"/> | <img src="mobile/assets/screenshots/05-collection.PNG" width="140"/> |
+
+|                              Detail                              |                              Browse                              |                              Add Entry                              |                        Recommendations                         |                                Result                                 |
+| :--------------------------------------------------------------: | :--------------------------------------------------------------: | :-----------------------------------------------------------------: | :------------------------------------------------------------: | :-------------------------------------------------------------------: |
+| <img src="mobile/assets/screenshots/06-detail.PNG" width="140"/> | <img src="mobile/assets/screenshots/07-browse.PNG" width="140"/> | <img src="mobile/assets/screenshots/08-add-entry.PNG" width="140"/> | <img src="mobile/assets/screenshots/09-recc.PNG" width="140"/> | <img src="mobile/assets/screenshots/10-recc-result.PNG" width="140"/> |
+
+</div>
 
 ---
 
