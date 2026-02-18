@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Keyboard } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Text, useTheme, Searchbar } from 'react-native-paper';
 import { apiService } from '../services/api';
 import SearchResultCard from '../components/SearchResultCard';
@@ -13,7 +13,7 @@ export default function SearchScreen() {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  
+
   // Quick add sheet
   const [sheetVisible, setSheetVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -27,7 +27,7 @@ export default function SearchScreen() {
 
     setLoading(true);
     setSearched(true);
-    
+
     try {
       const data = await apiService.searchMulti(searchQuery);
       setResults(data);
@@ -39,11 +39,22 @@ export default function SearchScreen() {
     }
   };
 
-  const handleQuickAdd = (result: any) => {
-    setSelectedItem(result);
-    setSheetVisible(true);
+  const handleQuickAdd = useCallback((result: any) => {
     Keyboard.dismiss();
-  };
+    // Small delay so keyboard dismiss animation doesn't fight sheet opening
+    setTimeout(() => {
+      setSelectedItem(result);
+      setSheetVisible(true);
+    }, 50);
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: any }) => (
+    <SearchResultCard
+      result={item}
+      onPress={() => handleQuickAdd(item)}
+      onQuickAdd={() => handleQuickAdd(item)}
+    />
+  ), [handleQuickAdd]);
 
   const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
     if (!selectedItem) return;
@@ -60,7 +71,7 @@ export default function SearchScreen() {
 
       setSheetVisible(false);
       setSelectedItem(null);
-      
+
       haptics.success();
       Toast.show({
         type: 'success',
@@ -100,48 +111,50 @@ export default function SearchScreen() {
 
       {/* Results */}
       {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ color: theme.colors.onSurface, marginTop: 16 }}>
-            Searching...
-          </Text>
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={{ color: theme.colors.onSurface, marginTop: 16 }}>
+              Searching...
+            </Text>
+          </View>
+        </TouchableWithoutFeedback>
       ) : searched && results.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text 
-            variant="titleLarge" 
-            style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', marginBottom: 8 }}
-          >
-            NO TAPES FOUND
-          </Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>
-            Try searching for something else
-          </Text>
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.centerContainer}>
+            <Text
+              variant="titleLarge"
+              style={{ color: theme.colors.onSurface, fontFamily: 'BebasNeue_400Regular', marginBottom: 8 }}
+            >
+              NO TAPES FOUND
+            </Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Try searching for something else
+            </Text>
+          </View>
+        </TouchableWithoutFeedback>
       ) : !searched ? (
-        <View style={styles.centerContainer}>
-          <Text 
-            variant="titleLarge" 
-            style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', marginBottom: 8 }}
-          >
-            BROWSE THE STORE
-          </Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular', textAlign: 'center' }}>
-            Search for movies and TV shows
-          </Text>
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.centerContainer}>
+            <Text
+              variant="titleLarge"
+              style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', marginBottom: 8 }}
+            >
+              BROWSE THE STORE
+            </Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular', textAlign: 'center' }}>
+              Search for movies and TV shows
+            </Text>
+          </View>
+        </TouchableWithoutFeedback>
       ) : (
         <FlatList
           data={results}
           keyExtractor={(item) => `${item.media_type}-${item.id}`}
-          renderItem={({ item }) => (
-            <SearchResultCard
-              result={item}
-              onPress={() => handleQuickAdd(item)}
-              onQuickAdd={() => handleQuickAdd(item)}
-            />
-          )}
+          renderItem={renderItem}
           contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         />
       )}
 

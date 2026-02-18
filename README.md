@@ -2,7 +2,7 @@
 
 > Your personal video store in your pocket
 
-A full-stack movie and TV tracking app with AI-powered recommendations. Built with modern tech and a nostalgic touch—think retro video store vibes meets Gen Z aesthetics. Now with multi-user support and secure authentication.
+A full-stack movie and TV tracking app with AI-powered recommendations. Built with a nostalgic retro video store aesthetic — warm cream, burnt orange, flickering neon, and now a fully interactive membership card.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -14,44 +14,52 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 ## ✨ Features
 
 ### 📱 Mobile App (iOS & Android)
-- **Multi-User Accounts** 🔐 - Secure login/registration so every user has their own private library
-- **Track Your Watches** 🎥 - Log movies and TV shows with personal ratings (1-10) and notes
-- **Edit Ratings & Notes** ✏️ - Update your reviews anytime from the detail screen
-- **Smart Search** 🔍 - Browse 600K+ movies and TV shows via TMDB multi-search
-- **AI Recommendations** 🤖 - Get personalized suggestions from Claude AI, saved to your profile
-- **Beautiful Stats** 📊 - Dashboard with watch counts, monthly activity, favorite genres, and more
-- **Neon UI** 💡 - Flickering neon text headers that mimic real vintage signage
-- **Retro Design** 📼 - Indie video store theme with custom fonts and smooth animations
+
+- **Multi-User Accounts** 🔐 — Secure login/registration with session-based auth
+- **Member Enrollment Flow** 🎴 — Sign-up feels like labeling your personal VHS tape, then receiving your membership card with animated field reveals
+- **Interactive Membership Card** 📇 — Tiltable card on profile using DeviceMotion + pan gesture (gravity-aware, springs back on release)
+- **Track Your Watches** 🎥 — Log movies and TV shows with personal ratings (1–10) and notes
+- **Edit Ratings & Notes** ✏️ — Native header buttons (Edit | Delete) styled to match iOS back button
+- **Smart Search** 🔍 — Browse 600K+ movies and TV shows via TMDB multi-search
+- **AI Recommendations** 🤖 — Personalized suggestions from Claude AI, saved to your profile
+- **Beautiful Stats** 📊 — Dashboard with watch counts, monthly activity, favorite genres
+- **Neon UI** 💡 — Flickering neon text headers with realistic vintage signage effect
+- **Retro Design** 📼 — Poster-first library grid, warm color palette, custom retro fonts
+- **Haptic Feedback** — Tactile response throughout
 
 ### 🔧 Backend API
-- **Secure Authentication** - Session-based auth with bcrypt password hashing
-- **User Scoping** - All content and watch history is strictly scoped to the authenticated user
-- **TMDB Integration** - Automatic content fetching with posters, metadata, and genre data
-- **Persisted Recommendations** - AI suggestions are stored in the database for easy retrieval
-- **Type Safety** - Full TypeScript coverage with Prisma-generated types
-- **Comprehensive Testing** - 125+ tests across unit, integration, and E2E suites
+
+- **Secure Authentication** — Session-based auth with bcrypt password hashing
+- **User Scoping** — All content and watch history strictly scoped to authenticated user
+- **TMDB Integration** — Automatic content fetching with posters, metadata, genres
+- **Persisted Recommendations** — AI suggestions stored in database for retrieval
+- **Type Safety** — Full TypeScript with Prisma-generated types
+- **Comprehensive Testing** — 125+ tests across unit, integration, and E2E suites
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js 20+ with TypeScript
 - **Framework**: Express.js (REST API)
 - **Database**: PostgreSQL + Prisma ORM
-- **Auth**: Session-based with Bcrypt hashing
-- **AI**: Anthropic Claude API (Sonnet 4)
-- **External Data**: The Movie Database (TMDB) API
+- **Auth**: Session-based with bcrypt hashing
+- **AI**: Anthropic Claude API (claude-sonnet-4-5)
+- **External Data**: TMDB API
 - **Testing**: Jest + Supertest
 
 ### Mobile
+
 - **Framework**: React Native + Expo
 - **Language**: TypeScript
-- **UI Library**: React Native Paper (Material Design)
+- **UI Library**: React Native Paper (Material Design 3)
 - **Navigation**: React Navigation (Stack + Tabs)
-- **Fonts**: Tilt Neon, Bebas Neue, SpaceMono (retro aesthetic)
-- **Storage**: Expo SecureStore (for auth tokens)
-- **Animations**: React Native Animated (neon flicker), Reanimated, Haptics
+- **Icons**: Phosphor React Native
+- **Fonts**: Tilt Neon, Bebas Neue, Righteous, SpaceMono, PatrickHand
+- **Animations**: Reanimated 3, React Native Animated, DeviceMotion, Gesture Handler
+- **Storage**: Expo SecureStore
 - **Networking**: Axios with auth interceptors
 
 ---
@@ -62,61 +70,62 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 ReelMark/
 ├── server/                        # Backend API
 │   ├── src/
-│   │   ├── app.ts                # Express app setup
-│   │   ├── index.ts              # Server entry point
+│   │   ├── app.ts
+│   │   ├── index.ts
 │   │   ├── config/
-│   │   │   └── database.ts       # Prisma client instance
-│   │   ├── middleware/            # Express middleware
-│   │   │   └── auth.middleware.ts # Session token validation
-│   │   ├── services/             # Business logic layer
+│   │   │   └── database.ts
+│   │   ├── middleware/
+│   │   │   └── auth.middleware.ts
+│   │   ├── services/
 │   │   │   ├── auth.service.ts
 │   │   │   ├── user.service.ts
 │   │   │   ├── content.service.ts
 │   │   │   ├── watchEntry.service.ts
 │   │   │   ├── tmdb.service.ts
 │   │   │   └── recommendation.service.ts
-│   │   ├── routes/               # API endpoints
+│   │   ├── routes/
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── user.routes.ts
 │   │   │   ├── content.routes.ts
 │   │   │   ├── watchEntry.routes.ts
 │   │   │   └── recommendation.routes.ts
-│   │   └── __tests__/            # Test suite
+│   │   └── __tests__/
 │   │       ├── unit/
 │   │       ├── integration/
 │   │       └── e2e/
 │   ├── prisma/
-│   │   └── schema.prisma         # Database schema
+│   │   └── schema.prisma
 │   └── package.json
 │
 └── mobile/                        # React Native app
     ├── .env                       # API URL config (gitignored)
     ├── App.tsx
     ├── src/
-    │   ├── context/              # React context providers
-    │   │   └── AuthContext.tsx    # Auth state management
-    │   ├── components/           # Reusable UI components
-    │   │   ├── NeonText.tsx      # Flickering neon text effect
+    │   ├── context/
+    │   │   └── AuthContext.tsx
+    │   ├── components/
+    │   │   ├── MembershipCard.tsx    # ← shared card used in Profile + Login
+    │   │   ├── NeonText.tsx
     │   │   ├── WatchCard.tsx
     │   │   ├── SearchResultCard.tsx
     │   │   ├── QuickAddSheet.tsx
     │   │   ├── RecommendationCard.tsx
     │   │   ├── StatCard.tsx
-    │   │   └── AnimatedPressable.tsx
-    │   ├── screens/              # Main app screens
-    │   │   ├── LoginScreen.tsx
+    │   │   └── StarButton.tsx
+    │   ├── screens/
+    │   │   ├── LoginScreen.tsx       # Tape enrollment + card issue flow
     │   │   ├── HomeScreen.tsx
     │   │   ├── SearchScreen.tsx
     │   │   ├── LibraryScreen.tsx
     │   │   ├── RecommendScreen.tsx
-    │   │   ├── ProfileScreen.tsx
+    │   │   ├── ProfileScreen.tsx     # Interactive membership card
     │   │   └── DetailScreen.tsx
-    │   ├── navigation/           # Navigation setup
+    │   ├── navigation/
     │   │   ├── AppNavigator.tsx
     │   │   └── types.ts
-    │   ├── services/             # API client
+    │   ├── services/
     │   │   └── api.ts
-    │   ├── theme/                # Design system
+    │   ├── theme/
     │   │   └── index.ts
     │   └── utils/
     │       └── haptics.ts
@@ -125,51 +134,130 @@ ReelMark/
 
 ---
 
+## 🚀 Running Locally (on your own phone)
+
+This is the fastest way to use ReelMark without any deployment.
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL 14+
+- [Expo Go](https://expo.dev/go) installed on your phone
+- [TMDB API key](https://www.themoviedb.org/settings/api) (free)
+- [Anthropic API key](https://console.anthropic.com/) (pay-as-you-go)
+
+### 1. Backend
+
+```bash
+cd server
+npm install
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/reelmark
+PORT=3000
+TMDB_API_KEY=your_tmdb_key
+TMDB_BASE_URL=https://api.themoviedb.org/3
+ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+```bash
+npx prisma migrate dev
+npm run dev
+# Backend running at http://localhost:3000
+```
+
+### 2. Find your laptop's local IP
+
+```bash
+# Mac
+ipconfig getifaddr en0
+# e.g. 192.168.1.42
+```
+
+Your phone and laptop must be on the **same WiFi**.
+
+### 3. Mobile
+
+```bash
+cd mobile
+npm install
+```
+
+Create `mobile/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
+```
+
+```bash
+npx expo start
+```
+
+Scan the QR code with your phone's Camera app (iOS) or Expo Go (Android). That's it.
+
+---
+
+## 🔑 API Keys & Security
+
+All secret keys live **only on the backend** — they are never shipped in the mobile app bundle.
+
+```
+Mobile App  →  Your Express Server  →  TMDB API
+                                    →  Anthropic API
+```
+
+The mobile app only knows your backend URL. Your backend handles all third-party calls using the keys stored in `.env` (which is gitignored).
+
+---
+
 ## 🚀 API Reference
 
-### Authentication (New)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Create account (username, email, password) |
-| `POST` | `/api/auth/login` | Login and receive session token |
-| `POST` | `/api/auth/logout` | Invalidate current session |
-| `GET`  | `/api/auth/me` | Get current authenticated user details |
+### Authentication
+
+| Method | Endpoint             | Description                  |
+| ------ | -------------------- | ---------------------------- |
+| `POST` | `/api/auth/register` | Create account               |
+| `POST` | `/api/auth/login`    | Login, receive session token |
+| `POST` | `/api/auth/logout`   | Invalidate session           |
+| `GET`  | `/api/auth/me`       | Get current user             |
 
 ### Content
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/content` | Get **your** library (content you have watched) |
-| `GET` | `/api/content/:id` | Get content by ID |
-| `GET` | `/api/content/tmdb/:tmdbId` | Look up content by TMDB ID |
-| `POST` | `/api/content/movie` | Save movie from TMDB (auto-fetch metadata) |
-| `POST` | `/api/content/tv` | Save TV show from TMDB |
+
+| Method | Endpoint             | Description            |
+| ------ | -------------------- | ---------------------- |
+| `GET`  | `/api/content`       | Your library           |
+| `GET`  | `/api/content/:id`   | Content by ID          |
+| `POST` | `/api/content/movie` | Save movie from TMDB   |
+| `POST` | `/api/content/tv`    | Save TV show from TMDB |
 
 ### Watch Entries
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/watch-entries` | Create watch entry for **current user** |
-| `GET` | `/api/watch-entries/history` | Get **current user's** watch history |
-| `GET` | `/api/watch-entries/stats` | Get **current user's** statistics |
-| `GET` | `/api/watch-entries/:id` | Get specific entry (ownership enforced) |
-| `PATCH` | `/api/watch-entries/:id` | Update rating/notes (ownership enforced) |
-| `DELETE` | `/api/watch-entries/:id` | Delete entry (ownership enforced) |
+
+| Method   | Endpoint                     | Description         |
+| -------- | ---------------------------- | ------------------- |
+| `POST`   | `/api/watch-entries`         | Log a watch         |
+| `GET`    | `/api/watch-entries/history` | Your watch history  |
+| `GET`    | `/api/watch-entries/stats`   | Your statistics     |
+| `PATCH`  | `/api/watch-entries/:id`     | Update rating/notes |
+| `DELETE` | `/api/watch-entries/:id`     | Remove entry        |
 
 ### Recommendations
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/recommendations` | Generate & save AI recommendation |
-| `GET` | `/api/recommendations/history` | Get **your** past recommendations |
-| `GET` | `/api/recommendations/status` | Check eligibility status |
 
-### Search
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/search/movies?q=query` | Search TMDB for movies/shows |
+| Method | Endpoint                       | Description                |
+| ------ | ------------------------------ | -------------------------- |
+| `POST` | `/api/recommendations`         | Generate AI recommendation |
+| `GET`  | `/api/recommendations/history` | Past recommendations       |
+| `GET`  | `/api/recommendations/status`  | Check eligibility          |
 
-### Health
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | API health check |
+### Search & Health
+
+| Method | Endpoint                     | Description      |
+| ------ | ---------------------------- | ---------------- |
+| `GET`  | `/api/search/movies?q=query` | Search TMDB      |
+| `GET`  | `/health`                    | API health check |
 
 ---
 
@@ -177,40 +265,25 @@ ReelMark/
 
 ```prisma
 model User {
-  id           String    @id @default(uuid())
-  username     String    @unique
-  email        String?   @unique
-  passwordHash String    // stored as bcrypt hash
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String?  @unique
+  passwordHash String
   displayName  String?
-  avatarUrl    String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
 
-  watchEntries   WatchEntry[]
-  sessions       Session[]
+  watchEntries    WatchEntry[]
+  sessions        Session[]
   recommendations Recommendation[]
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  userId       String
-  token        String   @unique
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Recommendation {
-  id           String   @id @default(uuid())
-  userId       String
-  contentId    String?  // Optional link to Content
-  title        String
-  reason       String
-  tmdbId       Int?
-  createdAt    DateTime @default(now())
-
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content      Content? @relation(fields: [contentId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Content {
@@ -222,244 +295,173 @@ model Content {
   posterPath       String?
   genres           String[]
   overview         String?
-  
-  // TV-specific
   numberOfSeasons  Int?
   numberOfEpisodes Int?
-  
-  createdAt        DateTime @default(now())
-  watchEntries     WatchEntry[]
-  recommendations  Recommendation[]
+  createdAt        DateTime    @default(now())
+
+  watchEntries    WatchEntry[]
+  recommendations Recommendation[]
 }
 
 model WatchEntry {
-  id         String   @id @default(uuid())
-  userId     String
-  contentId  String
-  watchedAt  DateTime @default(now())
-  rating     Int?     // 1-10 scale
-  notes      String?
-  season     Int?
-  episode    Int?
-  
-  user       User     @relation(...)
-  content    Content  @relation(...)
-  
-  @@unique([userId, contentId, season, episode])
+  id        String   @id @default(uuid())
+  userId    String
+  contentId String
+  watchedAt DateTime @default(now())
+  rating    Int?     // 1–10
+  notes     String?
+
+  user    User    @relation(fields: [userId], references: [id])
+  content Content @relation(fields: [contentId], references: [id])
+
+  @@unique([userId, contentId])
+}
+
+model Recommendation {
+  id        String   @id @default(uuid())
+  userId    String
+  contentId String?
+  title     String
+  reason    String
+  tmdbId    Int?
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content Content? @relation(fields: [contentId], references: [id])
 }
 ```
 
-## 💻 Getting Started
+---
 
-### Prerequisites
-- Node.js 20+
-- PostgreSQL 14+
-- iOS device/simulator (for mobile) OR Android device/emulator
-- [TMDB API key](https://www.themoviedb.org/settings/api) (free)
-- [Anthropic API key](https://console.anthropic.com/) (pay-as-you-go)
+## 🎨 Design System
 
-### Backend Setup
+**Retro video store meets modern mobile UX**
 
-1. **Clone and install**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/reelmark.git
-   cd reelmark/server
-   npm install
-   ```
+| Token              | Value     | Usage                                       |
+| ------------------ | --------- | ------------------------------------------- |
+| `primary`          | `#D35400` | Burnt orange — buttons, accents, card bands |
+| `background`       | `#FFF6EC` | Warm cream — main background                |
+| `surface`          | `#FFF0E0` | Peach cream — cards                         |
+| `surfaceVariant`   | `#F5E1CC` | Warm beige — inputs, variants               |
+| `onSurface`        | `#2C1810` | Dark brown — primary text                   |
+| `onSurfaceVariant` | `#6B4423` | Medium brown — labels, secondary text       |
 
-2. **Configure environment**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env`:
-   ```env
-   DATABASE_URL=postgresql://postgres:password@localhost:5432/reelmark
-   PORT=3000
-   TMDB_API_KEY=your_tmdb_api_key_here
-   TMDB_BASE_URL=https://api.themoviedb.org/3
-   ANTHROPIC_API_KEY=your_anthropic_api_key_here
-   ```
+**Typography**
 
-3. **Set up database**
-   ```bash
-   npx prisma migrate dev
-   ```
+- `BebasNeue` — all-caps display headers, card store name
+- `Righteous` — section headings, button labels
+- `SpaceMono` — monospace labels, metadata, typewriter fields
+- `PatrickHand` — handwritten fields on membership card and tape
+- `Tilt Neon` — animated neon glow headers
 
-4. **Run the server**
-   ```bash
-   npm run dev
-   ```
-   
-   Backend runs at `http://localhost:3000` 🚀
+**Key Interactions**
 
-5. **Run tests** (optional)
-   ```bash
-   npm test
-   ```
-
-### Mobile Setup
-
-1. **Install dependencies**
-   ```bash
-   cd ../mobile
-   npm install
-   ```
-
-2. **Configure API endpoint**
-   
-   Create a `.env` file in the `mobile/` directory:
-   ```env
-   EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
-   ```
-   Replace `192.168.X.X` with your computer's local IP (find with `ipconfig` or `ifconfig`).
-
-3. **Start Expo**
-   ```bash
-   npx expo start
-   ```
-
-4. **Run on device**
-   - **iOS**: Scan QR code with Camera app → Opens in Expo Go
-   - **Android**: Scan QR code with Expo Go app
-   - **Simulator**: Press `i` (iOS) or `a` (Android) in terminal
+- Flickering neon text (realistic random flicker timing)
+- Membership card tilts with phone gravity via DeviceMotion
+- Pan gesture adds tilt on top of motion, springs back on release
+- Sign-up: type username/password on cassette tape label → card animates in field-by-field
+- Poster-first 2-column grid in library (video store shelf feel)
+- Bouncy star rating animation with haptics
+- Toast notifications, no intrusive alerts
 
 ---
 
-## 🎨 Design Philosophy
+## 📸 Screenshots
 
-**Retro Video Store meets Modern UX**
+| Register                                                          | Login                                                          | Home                                                          | Profile                                                          | Collection                                                          |
+| ----------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
+| <img src="mobile/assets/screenshots/01-register.PNG" width="150"> | <img src="mobile/assets/screenshots/02-login.PNG" width="150"> | <img src="mobile/assets/screenshots/03-home.PNG" width="150"> | <img src="mobile/assets/screenshots/04-profile.PNG" width="150"> | <img src="mobile/assets/screenshots/05-collection.PNG" width="150"> |
 
-- **Visual Theme**: Indie video store aesthetic with warm browns, burnt orange accents, and cream text
-- **Typography**: 
-  - Tilt Neon (neon headers) - glowing animated text with realistic flicker effect
-  - Bebas Neue (headings) - bold, all-caps video store signage
-  - SpaceMono (labels) - retro monospace terminal font
-  - System fonts (body) - readable, accessible
-- **Interactions**: 
-  - Flickering neon text that mimics real vintage signage
-  - Smooth scale animations on press
-  - Haptic feedback for tactile feel
-  - Toast notifications instead of alerts
-  - Bouncy star ratings
-- **Terminology**: Subtle nods to video stores ("Your Collection", "Browse Store", "Ask the Clerk")
+| Detail                                                          | Browse                                                          | Add Entry                                                          | Recommendations                                               | Result                                                               |
+| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------- |
+| <img src="mobile/assets/screenshots/06-detail.PNG" width="150"> | <img src="mobile/assets/screenshots/07-browse.PNG" width="150"> | <img src="mobile/assets/screenshots/08-add-entry.PNG" width="150"> | <img src="mobile/assets/screenshots/09-recc.PNG" width="150"> | <img src="mobile/assets/screenshots/10-recc-result.PNG" width="150"> |
 
 ---
 
-## 🏗️ Architecture Decisions
+## 🏗️ Architecture
 
-### Why PostgreSQL?
-Relational data (users ↔ entries ↔ content) with complex queries for stats and recommendations. SQL's joins and aggregations are perfect for analytics.
-
-### Why Prisma?
-- Type-safe database access with auto-generated TypeScript types
-- Migration system for schema evolution
-- Excellent DX with Prisma Studio for debugging
-
-### Why React Native + Expo?
-- Write once, deploy to iOS and Android
-- Fast iteration with hot reload
-- Easy testing on real devices via Expo Go
-- Large ecosystem of libraries
-
-### Why Claude AI?
-- Superior reasoning for nuanced recommendations
-- Understands context beyond simple genre matching
-- Can explain *why* it recommends something
-- Cost-effective for low-traffic personal app (~$0.01-0.02 per recommendation)
-
-### Layered Architecture
 ```
-Routes (HTTP) → Services (Business Logic) → Database (Prisma)
+Routes (HTTP) → Middleware (Auth) → Services (Business Logic) → Prisma → PostgreSQL
 ```
-Clean separation enables easy testing, swapping implementations, and scaling.
+
+```
+Mobile → Axios (with token interceptor) → Express API → TMDB / Anthropic
+```
+
+The mobile app never holds API keys. All third-party calls go through the Express backend.
 
 ---
 
 ## 🗺️ Roadmap
 
 ### ✅ Completed
-- [x] Backend API with full CRUD operations
-- [x] PostgreSQL database with Prisma ORM
-- [x] TMDB integration (search, metadata, posters)
-- [x] Multi-search for movies and TV shows
-- [x] AI-powered recommendations with Claude
-- [x] Mobile app UI (7 screens)
-- [x] Stats dashboard with monthly activity tracking
-- [x] Search with quick-add functionality
-- [x] Detail views with ratings and notes
-- [x] Edit ratings and notes from detail screen
-- [x] Animations and haptic feedback
-- [x] Light theme with retro design system
-- [x] Neon text headers with realistic flicker animation
-- [x] Multi-user support with authentication
-- [x] Session expiry handling with auto-logout
-- [x] Profile screen with membership card and logout
+
+- [x] Full-stack backend (Express + PostgreSQL + Prisma)
+- [x] TMDB integration — search, metadata, posters
+- [x] Claude AI recommendations
+- [x] 7 mobile screens
+- [x] Multi-user auth with session management
+- [x] Poster-first library grid
+- [x] Stats dashboard
+- [x] Neon text with flicker animation
+- [x] Phosphor icon library migration
+- [x] Interactive membership card (DeviceMotion + gesture tilt)
+- [x] Cassette tape sign-up flow with animated card issue
+- [x] Native-style header Edit | Delete buttons on Detail screen
+- [x] Shared `MembershipCard` component across Profile + Login
 
 ### 🚧 In Progress
-- [ ] Update Backend Test
-- [ ] Add Frontend Test
+
+- [ ] Backend test updates
+- [ ] Frontend tests
 - [ ] Entertainment news integration
-- [ ] Loading skeletons for better perceived performance
+- [ ] Loading skeletons
 
 ### 📅 Planned
+
+- [ ] Backend deployment (Railway)
+- [ ] iOS App Store release
 - [ ] Social features (friends, shared watchlists)
 - [ ] Advanced stats (genre breakdowns, watch streaks, yearly recaps)
 - [ ] Export data (CSV, JSON)
-- [ ] Backend deployment (Railway/Render)
-- [ ] App store release (iOS + Android)
 
 ---
 
 ## 🤔 Challenges & Solutions
 
-### Challenge: Recommendation Quality
-**Problem**: Simple genre-based recommendations felt generic  
-**Solution**: Integrated Claude AI to analyze watch history holistically, considering ratings, notes, and viewing patterns for nuanced suggestions
+**Recommendation Quality** — Simple genre matching felt generic. Integrated Claude AI to analyze watch history holistically, considering ratings, notes, and patterns.
 
-### Challenge: Mobile Keyboard Covering Inputs
-**Problem**: iOS keyboard hid bottom sheet inputs when typing notes  
-**Solution**: Implemented `KeyboardAvoidingView` with dynamic safe area insets for proper spacing across all devices
+**Membership Card Tilt** — `PanResponder` + `Animated` ran on the JS thread and lagged. Switched to `react-native-reanimated` + `react-native-gesture-handler` for UI-thread animations. Added `DeviceMotion` as a base layer with gesture on top, additively combined.
 
-### Challenge: Performance on Large Watch Histories
-**Problem**: Loading 100+ entries caused lag  
-**Solution**: Implemented pagination on backend, added indexes on `userId` and `watchedAt`, cached frequently accessed data
+**Mobile Keyboard** — iOS keyboard hid bottom sheet inputs. Fixed with `KeyboardAvoidingView` + safe area insets.
 
-### Challenge: TMDB API Rate Limits
-**Problem**: Repeated searches could hit rate limits  
-**Solution**: Cached content in PostgreSQL after first fetch, debounced search input (300ms), added request throttling
-
----
-
-## 📸 Screenshots
-
-*Coming soon - app currently in development*
+**TMDB Rate Limits** — Cached content in PostgreSQL after first fetch, debounced search (300ms), added request throttling.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **TMDB** for the comprehensive movie/TV database and free API
-- **Anthropic** for Claude AI and excellent developer experience
-- **Expo** for making React Native development a breeze
-- **Prisma** for the best database ORM in TypeScript
+- **TMDB** — comprehensive movie/TV database and free API
+- **Anthropic** — Claude AI and excellent developer experience
+- **Expo** — making React Native development fast and pleasant
+- **Prisma** — best TypeScript ORM
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License — see [LICENSE](LICENSE) for details
 
 ---
 
 ## 👨‍💻 Author
 
-**[Tong Liu]**  
-📧 trevor.liu28@gmail.com
+**Tong Liu**  
+📧 trevor.liu28@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/trevortongliu/)  
-🐙 [GitHub](https://github.com/liuton23)  
+🐙 [GitHub](https://github.com/liuton23)
 
-*Built as a full-stack portfolio project showcasing modern web/mobile development practices*
+_Full-stack portfolio project — modern web/mobile development with a retro soul_
 
 ---
 
@@ -467,6 +469,6 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 **⭐ Star this repo if you find it interesting!**
 
-Made with ☕ and 🎬 by Tong
+Made with ☕ and 📼 by Tong
 
 </div>
