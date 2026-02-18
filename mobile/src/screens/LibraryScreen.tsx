@@ -97,16 +97,27 @@ export default function LibraryScreen() {
     );
   }
 
-  // List view
+  // Grid count label (e.g. "42 titles")
+  const countLabel = `${watchHistory.length} title${watchHistory.length !== 1 ? "s" : ""}`;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FlatList
         data={watchHistory}
         keyExtractor={(item) => item.id}
+        numColumns={2}
         renderItem={({ item }) => (
-          <WatchCard entry={item} onPress={() => handleCardPress(item)} />
+          <View style={styles.cardWrapper}>
+            <WatchCard entry={item} onPress={() => handleCardPress(item)} />
+          </View>
         )}
+        columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <Text style={[styles.countLabel, { color: theme.colors.onSurfaceVariant }]}>
+            {countLabel}
+          </Text>
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -130,6 +141,22 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    paddingTop: 8,
+  },
+  row: {
+    gap: 12,
+    marginBottom: 12,
+  },
+  cardWrapper: {
+    flex: 1,
+  },
+  countLabel: {
+    fontFamily: "SpaceMono_400Regular",
+    fontSize: 11,
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });

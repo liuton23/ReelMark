@@ -5,20 +5,20 @@ const theme = {
   colors: {
     ...MD3LightTheme.colors,
     // Bright Cream Retro Video Store Palette
-    primary: '#D35400',           // Burnt orange (main accent)
-    primaryContainer: '#F5A623',  // Warm amber for containers
-    secondary: '#3E8E5E',         // Muted forest green
+    primary: '#D35400', // Burnt orange (main accent)
+    primaryContainer: '#F5A623', // Warm amber for containers
+    secondary: '#3E8E5E', // Muted forest green
     secondaryContainer: '#A8D8B9',
-    background: '#FFF6EC',        // Bright warm cream (main bg)
-    surface: '#FFF0E0',           // Soft peach cream (cards/surfaces)
-    surfaceVariant: '#F5E1CC',    // Warm beige for variants
-    onPrimary: '#FFFFFF',         // White text on orange
-    onSecondary: '#FFFFFF',       // White text on green
-    onBackground: '#2C1810',      // Dark brown (primary text)
-    onSurface: '#2C1810',         // Dark brown
-    onSurfaceVariant: '#6B4423',  // Medium brown (secondary text)
-    outline: '#D4B896',           // Warm tan (borders/dividers)
-    error: '#C0392B',             // Deep red for errors
+    background: '#FFF6EC', // Bright warm cream (main bg)
+    surface: '#FFF0E0', // Soft peach cream (cards/surfaces)
+    surfaceVariant: '#F5E1CC', // Warm beige for variants
+    onPrimary: '#FFFFFF', // White text on orange
+    onSecondary: '#FFFFFF', // White text on green
+    onBackground: '#2C1810', // Dark brown (primary text)
+    onSurface: '#2C1810', // Dark brown
+    onSurfaceVariant: '#6B4423', // Medium brown (secondary text)
+    outline: '#D4B896', // Warm tan (borders/dividers)
+    error: '#C0392B', // Deep red for errors
     elevation: {
       ...MD3LightTheme.colors.elevation,
       level0: 'transparent',
@@ -52,14 +52,14 @@ export const customTheme = {
   },
   // Retro-specific colors
   retro: {
-    shelfBrown: '#8B6914',        // Warm wooden shelf
-    caseShadow: '#00000015',      // Subtle shadow for depth
-    labelYellow: '#F4D03F',       // Vintage label color
-    stampRed: '#C0392B',          // Red stamp/badge color
-    neonOrange: '#D35400',        // Warm orange accent
-    warmGlow: '#F5A623',          // Warm amber glow
-    vinylBlack: '#2C1810',        // Dark brown for contrast
-    paperCream: '#FFF6EC',        // Bright cream
+    shelfBrown: '#8B6914', // Warm wooden shelf
+    caseShadow: '#00000015', // Subtle shadow for depth
+    labelYellow: '#F4D03F', // Vintage label color
+    stampRed: '#C0392B', // Red stamp/badge color
+    neonOrange: '#D35400', // Warm orange accent
+    warmGlow: '#F5A623', // Warm amber glow
+    vinylBlack: '#2C1810', // Dark brown for contrast
+    paperCream: '#FFF6EC', // Bright cream
   },
 };
 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
-import { Text, useTheme, IconButton } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text, useTheme } from 'react-native-paper';
+import { FilmStripIcon, PlusCircleIcon } from 'phosphor-react-native';
+import { TouchableOpacity } from 'react-native';
 import AnimatedPressable from './AnimatedPressable';
 
 interface SearchResult {
@@ -22,14 +23,14 @@ interface SearchResultCardProps {
 
 export default function SearchResultCard({ result, onPress, onQuickAdd }: SearchResultCardProps) {
   const theme = useTheme();
-  
+
   const title = result.title || result.name || 'Unknown';
-  const year = result.release_date 
+  const year = result.release_date
     ? new Date(result.release_date).getFullYear()
-    : result.first_air_date 
-    ? new Date(result.first_air_date).getFullYear()
-    : null;
-  
+    : result.first_air_date
+      ? new Date(result.first_air_date).getFullYear()
+      : null;
+
   const posterUrl = result.poster_path
     ? `https://image.tmdb.org/t/p/w185${result.poster_path}`
     : null;
@@ -39,53 +40,38 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
   return (
     <AnimatedPressable onPress={onPress}>
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-        {/* Poster */}
         <View style={styles.posterContainer}>
           {posterUrl ? (
-            <Image 
-              source={{ uri: posterUrl }} 
-              style={styles.poster}
-              resizeMode="cover"
-            />
+            <Image source={{ uri: posterUrl }} style={styles.poster} resizeMode="cover" />
           ) : (
             <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
-              <MaterialCommunityIcons 
-                name="filmstrip" 
-                size={30} 
-                color={theme.colors.onSurfaceVariant} 
-              />
+              <FilmStripIcon size={30} color={theme.colors.onSurfaceVariant} weight="thin" />
             </View>
           )}
         </View>
 
-        {/* Info */}
         <View style={styles.info}>
-          <Text 
-            variant="titleMedium" 
+          <Text
             numberOfLines={2}
             style={{ color: theme.colors.onSurface, fontFamily: 'Righteous_400Regular', fontSize: 16 }}
           >
             {title}
           </Text>
-          
-          <View style={styles.metadata}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular' }}>
-              {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
-            </Text>
-          </View>
+          <Text
+            style={{ color: theme.colors.onSurfaceVariant, fontFamily: 'SpaceMono_400Regular', fontSize: 12, marginTop: 4 }}
+          >
+            {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
+          </Text>
         </View>
 
-        {/* Quick Add Button */}
         {onQuickAdd && (
-          <IconButton
-            icon="plus-circle"
-            iconColor={theme.colors.primary}
-            size={28}
-            onPress={(e) => {
-              e.stopPropagation();
-              onQuickAdd();
-            }}
-          />
+          <TouchableOpacity
+            onPress={onQuickAdd}
+            style={styles.addButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <PlusCircleIcon size={28} color={theme.colors.primary} weight="fill" />
+          </TouchableOpacity>
         )}
       </View>
     </AnimatedPressable>
@@ -105,26 +91,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     alignItems: 'center',
   },
-  posterContainer: {
-    width: 60,
-    height: 90,
-  },
-  poster: {
-    width: '100%',
-    height: '100%',
-  },
+  posterContainer: { width: 60, height: 90 },
+  poster: { width: '100%', height: '100%' },
   posterPlaceholder: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  info: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-  },
-  metadata: {
-    marginTop: 4,
-  },
+  info: { flex: 1, padding: 12, justifyContent: 'center' },
+  addButton: { paddingRight: 12 },
 });

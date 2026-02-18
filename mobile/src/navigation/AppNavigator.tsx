@@ -2,7 +2,13 @@ import React from "react";
 import { ActivityIndicator, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  HouseIcon,
+  MagnifyingGlassIcon,
+  BooksIcon,
+  BellRingingIcon,
+  UserCircleIcon,
+} from "phosphor-react-native";
 import { useTheme } from "react-native-paper";
 import type { TabParamList, RootStackParamList } from "./types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,19 +25,6 @@ import DetailScreen from "../screens/DetailScreen";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
-
-const TAB_ICONS: Record<
-  keyof TabParamList,
-  { focused: IconName; unfocused: IconName }
-> = {
-  Home: { focused: "home", unfocused: "home-outline" },
-  Search: { focused: "movie-search", unfocused: "movie-search-outline" },
-  Library: { focused: "bookshelf", unfocused: "bookshelf" },
-  Recommend: { focused: "lightbulb-on", unfocused: "lightbulb-on-outline" },
-  Profile: { focused: "account-circle", unfocused: "account-circle-outline" },
-};
 
 const TAB_LABELS: Record<keyof TabParamList, string> = {
   Home: "HOME",
@@ -55,11 +48,15 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          const icons = TAB_ICONS[route.name];
-          const iconName = focused ? icons.focused : icons.unfocused;
-          return (
-            <MaterialCommunityIcons name={iconName} size={size} color={color} />
-          );
+          const weight = focused ? "fill" : "regular";
+          const props = { size, color, weight } as any;
+          switch (route.name) {
+            case "Home": return <HouseIcon {...props} />;
+            case "Search": return <MagnifyingGlassIcon {...props} />;
+            case "Library": return <BooksIcon {...props} />;
+            case "Recommend": return <BellRingingIcon {...props} />;
+            case "Profile": return <UserCircleIcon {...props} />;
+          }
         },
         tabBarLabel: TAB_LABELS[route.name],
         tabBarActiveTintColor: theme.colors.primary,
@@ -136,17 +133,10 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: {
-          backgroundColor: theme.colors.surface,
-        },
+        headerStyle: { backgroundColor: theme.colors.surface },
         headerTintColor: theme.colors.onSurface,
-        headerTitleStyle: {
-          fontFamily: "BebasNeue_400Regular",
-          fontSize: 24,
-        },
-        contentStyle: {
-          backgroundColor: theme.colors.background,
-        },
+        headerTitleStyle: { fontFamily: "BebasNeue_400Regular", fontSize: 24 },
+        contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       {isAuthenticated ? (
@@ -162,6 +152,8 @@ export default function AppNavigator() {
             options={{
               headerTitle: neonHeader("Rental Card"),
               presentation: "card",
+              headerBackTitle: "Back",
+              // headerRight is set dynamically by DetailScreen via navigation.setOptions()
             }}
           />
         </>

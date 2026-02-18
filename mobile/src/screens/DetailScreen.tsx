@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -9,22 +9,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import {
   Text,
   useTheme,
   Button,
-  IconButton,
   Chip,
   Divider,
   TextInput,
 } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FilmStripIcon, StarIcon, PencilSimpleIcon, TrashIcon, XIcon } from "phosphor-react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import { getTMDBPosterUrl, apiService } from "../services/api";
 import { haptics } from "../utils/haptics";
 import Toast from "react-native-toast-message";
+import { StarButton } from "../components/StarButton";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Detail">;
 
@@ -38,13 +39,54 @@ export default function DetailScreen({ route, navigation }: Props) {
   const [watchedAt] = useState(entry.watchedAt);
   const [deleting, setDeleting] = useState(false);
 
-  // Edit modal state
   const [editVisible, setEditVisible] = useState(false);
   const [editRating, setEditRating] = useState(rating);
   const [editNotes, setEditNotes] = useState(notes || "");
   const [saving, setSaving] = useState(false);
 
   const posterUrl = getTMDBPosterUrl(content.posterPath, "w500");
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          borderRadius: 20,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          gap: 10,
+        }}>
+          <TouchableOpacity
+            onPress={handleEdit}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <PencilSimpleIcon size={18} color={theme.colors.primary} weight="regular" />
+          </TouchableOpacity>
+
+          <View style={{
+            width: 1,
+            height: 14,
+            backgroundColor: theme.colors.onSurfaceVariant,
+            opacity: 0.4,
+          }} />
+
+          <TouchableOpacity
+            onPress={handleDelete}
+            disabled={deleting}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{ opacity: deleting ? 0.4 : 1 }}
+          >
+            <TrashIcon size={18} color={theme.colors.primary} weight="regular" />
+          </TouchableOpacity>
+        </View>
+      ),
+      // Match the back button width so the title stays centred
+      headerBackTitleStyle: { fontSize: 17 },
+    });
+  }, [navigation, deleting, theme]);
+
+
   const watchDate = new Date(watchedAt).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -65,11 +107,8 @@ export default function DetailScreen({ route, navigation }: Props) {
         rating: editRating ?? undefined,
         notes: editNotes.trim() || undefined,
       });
-
-      // Update local state so the screen reflects changes immediately
       setRating(editRating);
-      setNotes(editNotes.trim() || null);
-
+      setNotes(editNotes.trim() || undefined);
       haptics.success();
       Toast.show({
         type: "success",
@@ -127,41 +166,9 @@ export default function DetailScreen({ route, navigation }: Props) {
             }
           },
         },
-      ],
+      ]
     );
   };
-
-  // Star rating component
-  const StarRating = ({
-    value,
-    onSelect,
-  }: {
-    value: number | null;
-    onSelect: (v: number) => void;
-  }) => (
-    <View style={styles.stars}>
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-        <Pressable
-          key={star}
-          onPress={() => {
-            haptics.light();
-            onSelect(star === value ? 0 : star);
-          }}
-          hitSlop={4}
-        >
-          <MaterialCommunityIcons
-            name={value && star <= value ? "star" : "star-outline"}
-            size={28}
-            color={
-              value && star <= value
-                ? theme.colors.primary
-                : theme.colors.onSurfaceVariant
-            }
-          />
-        </Pressable>
-      ))}
-    </View>
-  );
 
   return (
     <>
@@ -169,54 +176,21 @@ export default function DetailScreen({ route, navigation }: Props) {
         style={[styles.container, { backgroundColor: theme.colors.background }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with Poster */}
+        {/* Poster */}
         <View style={styles.posterContainer}>
           {posterUrl ? (
-            <Image
-              source={{ uri: posterUrl }}
-              style={styles.poster}
-              resizeMode="cover"
-            />
+            <Image source={{ uri: posterUrl }} style={styles.poster} resizeMode="cover" />
           ) : (
-            <View
-              style={[
-                styles.posterPlaceholder,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="filmstrip"
-                size={80}
-                color={theme.colors.onSurfaceVariant}
-              />
+            <View style={[styles.posterPlaceholder, { backgroundColor: theme.colors.surfaceVariant }]}>
+              <FilmStripIcon size={80} color={theme.colors.onSurfaceVariant} weight="thin" />
             </View>
           )}
 
-          {/* Action Buttons Overlay */}
-          <View style={styles.headerActions}>
-            <IconButton
-              icon="pencil"
-              iconColor={theme.colors.onPrimary}
-              containerColor={theme.colors.primary}
-              size={24}
-              onPress={handleEdit}
-            />
-            <IconButton
-              icon="delete"
-              iconColor={theme.colors.onPrimary}
-              containerColor={theme.colors.error}
-              size={24}
-              onPress={handleDelete}
-              disabled={deleting}
-            />
-          </View>
         </View>
 
         {/* Content */}
         <View style={styles.content}>
-          {/* Title */}
           <Text
-            variant="headlineMedium"
             style={{
               color: theme.colors.onSurface,
               fontFamily: "Righteous_400Regular",
@@ -227,37 +201,21 @@ export default function DetailScreen({ route, navigation }: Props) {
             {content.title}
           </Text>
 
-          {/* Metadata */}
           <View style={styles.metadata}>
-            <Text
-              variant="bodyMedium"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                fontFamily: "SpaceMono_400Regular",
-              }}
-            >
+            <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular" }}>
               {content.releaseYear} {"• "}
               {content.type === "MOVIE" ? "Movie" : "TV Show"}
               {content.runtime && ` • ${content.runtime} min`}
             </Text>
           </View>
 
-          {/* Genres */}
           {content.genres && content.genres.length > 0 && (
             <View style={styles.genres}>
               {content.genres.map((genre, index) => (
                 <Chip
                   key={index}
-                  style={{
-                    backgroundColor: theme.colors.surfaceVariant,
-                    marginRight: 8,
-                    marginBottom: 8,
-                  }}
-                  textStyle={{
-                    color: theme.colors.onSurfaceVariant,
-                    fontFamily: "SpaceMono_400Regular",
-                    fontSize: 12,
-                  }}
+                  style={{ backgroundColor: theme.colors.surfaceVariant, marginRight: 8, marginBottom: 8 }}
+                  textStyle={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular", fontSize: 12 }}
                 >
                   {genre}
                 </Chip>
@@ -267,11 +225,10 @@ export default function DetailScreen({ route, navigation }: Props) {
 
           <Divider style={{ marginVertical: 10 }} />
 
-          {/* Your Rating */}
+          {/* Rating */}
           {rating ? (
             <View style={styles.section}>
               <Text
-                variant="labelLarge"
                 style={{
                   color: theme.colors.primary,
                   fontFamily: "Righteous_400Regular",
@@ -282,17 +239,13 @@ export default function DetailScreen({ route, navigation }: Props) {
                 YOUR RATING
               </Text>
               <View style={styles.ratingRow}>
-                <MaterialCommunityIcons
-                  name="star"
-                  size={28}
-                  color={theme.colors.primary}
-                />
+                <StarIcon size={28} color={theme.colors.primary} weight="fill" />
                 <Text
-                  variant="headlineSmall"
                   style={{
                     color: theme.colors.primary,
                     marginLeft: 8,
                     fontFamily: "Righteous_400Regular",
+                    fontSize: 24,
                     fontWeight: "bold",
                   }}
                 >
@@ -303,13 +256,7 @@ export default function DetailScreen({ route, navigation }: Props) {
           ) : (
             <View style={styles.section}>
               <Pressable onPress={handleEdit}>
-                <Text
-                  variant="bodyMedium"
-                  style={{
-                    color: theme.colors.primary,
-                    fontFamily: "SpaceMono_400Regular",
-                  }}
-                >
+                <Text style={{ color: theme.colors.primary, fontFamily: "SpaceMono_400Regular" }}>
                   + Add a rating
                 </Text>
               </Pressable>
@@ -319,7 +266,6 @@ export default function DetailScreen({ route, navigation }: Props) {
           {/* Watch Date */}
           <View style={styles.section}>
             <Text
-              variant="labelLarge"
               style={{
                 color: theme.colors.onSurfaceVariant,
                 fontFamily: "Righteous_400Regular",
@@ -329,17 +275,16 @@ export default function DetailScreen({ route, navigation }: Props) {
             >
               CHECKED OUT ON
             </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurface, fontFamily: "SpaceMono_400Regular" }}>
+            <Text style={{ color: theme.colors.onSurface, fontFamily: "SpaceMono_400Regular", fontSize: 12 }}>
               {watchDate}
             </Text>
           </View>
 
           <Divider style={{ marginVertical: 10 }} />
 
-          {/* Your Notes */}
+          {/* Notes */}
           <View style={styles.section}>
             <Text
-              variant="titleMedium"
               style={{
                 color: theme.colors.onSurface,
                 fontFamily: "Righteous_400Regular",
@@ -350,25 +295,12 @@ export default function DetailScreen({ route, navigation }: Props) {
               YOUR NOTES
             </Text>
             {notes ? (
-              <Text
-                variant="bodyLarge"
-                style={{
-                  color: theme.colors.onSurface,
-                  fontFamily: "PatrickHand_400Regular",
-                  lineHeight: 24,
-                }}
-              >
+              <Text style={{ color: theme.colors.onSurface, fontFamily: "PatrickHand_400Regular", lineHeight: 24, fontSize: 16 }}>
                 {notes}
               </Text>
             ) : (
               <Pressable onPress={handleEdit}>
-                <Text
-                  variant="bodyMedium"
-                  style={{
-                    color: theme.colors.primary,
-                    fontFamily: "SpaceMono_400Regular",
-                  }}
-                >
+                <Text style={{ color: theme.colors.primary, fontFamily: "SpaceMono_400Regular" }}>
                   + Add notes
                 </Text>
               </Pressable>
@@ -381,7 +313,6 @@ export default function DetailScreen({ route, navigation }: Props) {
               <Divider style={{ marginVertical: 10 }} />
               <View style={styles.section}>
                 <Text
-                  variant="titleMedium"
                   style={{
                     color: theme.colors.onSurface,
                     fontFamily: "Righteous_400Regular",
@@ -392,11 +323,11 @@ export default function DetailScreen({ route, navigation }: Props) {
                   OVERVIEW
                 </Text>
                 <Text
-                  variant="bodySmall"
                   style={{
                     color: theme.colors.onSurfaceVariant,
                     fontFamily: "SpaceMono_400Regular",
                     lineHeight: 22,
+                    fontSize: 12,
                   }}
                 >
                   {content.overview}
@@ -406,41 +337,33 @@ export default function DetailScreen({ route, navigation }: Props) {
           )}
 
           {/* TV Show Info */}
-          {content.type === "TV_SHOW" &&
-            (content.numberOfSeasons || content.numberOfEpisodes) && (
-              <>
-                <Divider style={{ marginVertical: 10 }} />
-                <View style={styles.section}>
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      color: theme.colors.onSurface,
-                      fontFamily: "Righteous_400Regular",
-                      fontSize: 16,
-                      marginBottom: 10,
-                    }}
-                  >
-                    SERIES INFO
+          {content.type === "TV_SHOW" && (content.numberOfSeasons || content.numberOfEpisodes) && (
+            <>
+              <Divider style={{ marginVertical: 10 }} />
+              <View style={styles.section}>
+                <Text
+                  style={{
+                    color: theme.colors.onSurface,
+                    fontFamily: "Righteous_400Regular",
+                    fontSize: 16,
+                    marginBottom: 10,
+                  }}
+                >
+                  SERIES INFO
+                </Text>
+                {content.numberOfSeasons && (
+                  <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular", fontSize: 12 }}>
+                    Seasons: {content.numberOfSeasons}
                   </Text>
-                  {content.numberOfSeasons && (
-                    <Text
-                      variant="bodySmall"
-                      style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular" }}
-                    >
-                      Seasons: {content.numberOfSeasons}
-                    </Text>
-                  )}
-                  {content.numberOfEpisodes && (
-                    <Text
-                      variant="bodySmall"
-                      style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular" }}
-                    >
-                      Total Episodes: {content.numberOfEpisodes}
-                    </Text>
-                  )}
-                </View>
-              </>
-            )}
+                )}
+                {content.numberOfEpisodes && (
+                  <Text style={{ color: theme.colors.onSurfaceVariant, fontFamily: "SpaceMono_400Regular", fontSize: 12 }}>
+                    Total Episodes: {content.numberOfEpisodes}
+                  </Text>
+                )}
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -455,88 +378,42 @@ export default function DetailScreen({ route, navigation }: Props) {
           style={styles.modalOverlay}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <Pressable
-            style={styles.modalBackdrop}
-            onPress={() => setEditVisible(false)}
-          />
-          <View
-            style={[
-              styles.modalContent,
-              { backgroundColor: theme.colors.surface },
-            ]}
-          >
-            {/* Modal Header */}
+          <Pressable style={styles.modalBackdrop} onPress={() => setEditVisible(false)} />
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.modalHeader}>
-              <Text
-                style={[
-                  styles.modalTitle,
-                  { color: theme.colors.onSurface },
-                ]}
-              >
+              <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
                 EDIT RENTAL CARD
               </Text>
-              <IconButton
-                icon="close"
-                size={20}
-                iconColor={theme.colors.onSurfaceVariant}
-                onPress={() => setEditVisible(false)}
-              />
+              <TouchableOpacity onPress={() => setEditVisible(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <XIcon size={20} color={theme.colors.onSurfaceVariant} weight="bold" />
+              </TouchableOpacity>
             </View>
 
-            <Text
-              style={[
-                styles.modalSubtitle,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
+            <Text style={[styles.modalSubtitle, { color: theme.colors.onSurfaceVariant }]}>
               {content.title}
             </Text>
 
             <Divider style={{ marginVertical: 16 }} />
 
-            {/* Rating */}
-            <Text
-              style={[
-                styles.fieldLabel,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              RATING
-            </Text>
-            <StarRating
-              value={editRating}
-              onSelect={(v) => setEditRating(v === 0 ? null : v)}
-            />
+            <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>RATING</Text>
+            <View style={styles.stars}>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                <StarButton
+                  key={star}
+                  value={star}
+                  rating={editRating}
+                  setRating={(v) => setEditRating(v === 0 ? undefined : v)}
+                />
+              ))}
+            </View>
 
             {editRating ? (
-              <Text
-                style={[
-                  styles.ratingLabel,
-                  { color: theme.colors.primary },
-                ]}
-              >
-                {editRating}/10
-              </Text>
+              <Text style={[styles.ratingLabel, { color: theme.colors.primary }]}>{editRating}/10</Text>
             ) : (
-              <Text
-                style={[
-                  styles.ratingLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                No rating
-              </Text>
+              <Text style={[styles.ratingLabel, { color: theme.colors.onSurfaceVariant }]}>No rating</Text>
             )}
 
-            {/* Notes */}
-            <Text
-              style={[
-                styles.fieldLabel,
-                { color: theme.colors.onSurfaceVariant, marginTop: 20 },
-              ]}
-            >
-              NOTES
-            </Text>
+            <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant, marginTop: 20 }]}>NOTES</Text>
             <TextInput
               mode="outlined"
               placeholder="What did you think?"
@@ -545,14 +422,13 @@ export default function DetailScreen({ route, navigation }: Props) {
               multiline
               numberOfLines={4}
               style={styles.notesInput}
-              contentStyle={{ fontFamily: 'PatrickHand_400Regular', fontSize: 16 }}
+              contentStyle={{ fontFamily: "PatrickHand_400Regular", fontSize: 16 }}
               outlineColor={theme.colors.outline}
               activeOutlineColor={theme.colors.primary}
               textColor={theme.colors.onSurface}
               placeholderTextColor={theme.colors.onSurfaceVariant}
             />
 
-            {/* Save Button */}
             <Button
               mode="contained"
               onPress={handleSave}
@@ -571,56 +447,26 @@ export default function DetailScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  posterContainer: {
-    width: "100%",
-    height: 400,
-    position: "relative",
-  },
-  poster: {
-    width: "100%",
-    height: "100%",
-  },
+  container: { flex: 1 },
+  posterContainer: { width: "100%", height: 400, position: "relative" },
+  poster: { width: "100%", height: "100%" },
   posterPlaceholder: {
     width: "100%",
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
-  headerActions: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    flexDirection: "row",
-    gap: 8,
+  headerBtn: {
+    padding: 6,
+    borderRadius: 8,
   },
-  content: {
-    padding: 20,
-  },
-  metadata: {
-    marginBottom: 16,
-  },
-  genres: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  section: {
-    marginBottom: 10,
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalBackdrop: {
-    flex: 1,
-  },
+  content: { padding: 20 },
+  metadata: { marginBottom: 16 },
+  genres: { flexDirection: "row", flexWrap: "wrap" },
+  section: { marginBottom: 10 },
+  ratingRow: { flexDirection: "row", alignItems: "center" },
+  modalOverlay: { flex: 1, justifyContent: "flex-end" },
+  modalBackdrop: { flex: 1 },
   modalContent: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -634,42 +480,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  modalTitle: {
-    fontFamily: "Righteous_400Regular",
-    fontSize: 20,
-    letterSpacing: 2
-  },
-  modalSubtitle: {
-    fontFamily: "SpaceMono_400Regular",
-    fontSize: 13,
-    marginTop: -4,
-  },
-  fieldLabel: {
-    fontFamily: "SpaceMono_400Regular",
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  stars: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  ratingLabel: {
-    fontFamily: "SpaceMono_400Regular",
-    fontSize: 13,
-    marginTop: 8,
-  },
-  notesInput: {
-    backgroundColor: "transparent",
-    maxHeight: 120,
-  },
-  saveButton: {
-    marginTop: 24,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  saveButtonLabel: {
-    fontFamily: "Righteous_400Regular",
-    fontSize: 14,
-    letterSpacing: 1,
-  },
+  modalTitle: { fontFamily: "Righteous_400Regular", fontSize: 20, letterSpacing: 2 },
+  modalSubtitle: { fontFamily: "SpaceMono_400Regular", fontSize: 13, marginTop: -4 },
+  fieldLabel: { fontFamily: "SpaceMono_400Regular", fontSize: 12, marginBottom: 8 },
+  stars: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
+  ratingLabel: { fontFamily: "SpaceMono_400Regular", fontSize: 13, marginTop: 8 },
+  notesInput: { backgroundColor: "transparent", maxHeight: 120 },
+  saveButton: { marginTop: 24, paddingVertical: 4, borderRadius: 8 },
+  saveButtonLabel: { fontFamily: "Righteous_400Regular", fontSize: 14, letterSpacing: 1 },
 });

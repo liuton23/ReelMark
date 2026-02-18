@@ -1,48 +1,42 @@
 import React, { useRef } from "react";
-import {
-  TouchableOpacity,
-  Animated,
-} from "react-native";
+import { TouchableOpacity, Animated } from "react-native";
 import { useTheme } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StarIcon } from "phosphor-react-native";
 import { haptics } from "../utils/haptics";
 
-type starButtonProp = {
-  value: number,
-  rating: number | undefined,
-  setRating: React.Dispatch<React.SetStateAction<number | undefined>>
-}
-export const StarButton = ({ value, rating, setRating }: starButtonProp) => {
+type StarButtonProp = {
+  value: number;
+  rating: number | undefined;
+  setRating: (v: number) => void;
+  edit?: boolean;
+};
+
+export const StarButton = ({ value, rating, setRating, edit }: StarButtonProp) => {
   const theme = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const filled = rating !== undefined && rating >= value;
+
   const handlePress = () => {
-    setRating(value);
+    if (edit) {
+      setRating(value === rating ? 0 : value);
+    } else {
+      setRating(value);
+    }
     haptics.light();
-    // Animate star
     Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 1.3,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        bounciness: 10,
-      }),
+      Animated.timing(scaleAnim, { toValue: 1.3, duration: 100, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, bounciness: 10 }),
     ]).start();
   };
+
   return (
     <TouchableOpacity onPress={handlePress}>
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-        <MaterialCommunityIcons
-          name={rating && rating >= value ? "star" : "star-outline"}
+        <StarIcon
           size={28}
-          color={
-            rating && rating >= value
-              ? theme.colors.primary
-              : theme.colors.onSurfaceVariant
-          }
+          weight={filled ? "fill" : "regular"}
+          color={filled ? theme.colors.primary : theme.colors.onSurfaceVariant}
         />
       </Animated.View>
     </TouchableOpacity>

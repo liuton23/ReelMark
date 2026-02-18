@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from "react-native";
 import { Text, useTheme, Button, TextInput } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { XIcon } from "phosphor-react-native";
 import { StarButton } from "./StarButton";
 
 interface QuickAddSheetProps {
@@ -31,23 +31,13 @@ export default function QuickAddSheet({
 
   const handleSubmit = () => {
     onSubmit(rating, notes);
-    // Reset
     setRating(undefined);
     setNotes("");
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.avoidingView}
@@ -65,7 +55,6 @@ export default function QuickAddSheet({
               {/* Header */}
               <View style={styles.header}>
                 <Text
-                  variant="titleLarge"
                   style={{
                     color: theme.colors.onSurface,
                     fontFamily: "Righteous_400Regular",
@@ -77,19 +66,14 @@ export default function QuickAddSheet({
                 >
                   LOG: {movieTitle}
                 </Text>
-                <TouchableOpacity onPress={onClose}>
-                  <MaterialCommunityIcons
-                    name="close"
-                    size={24}
-                    color={theme.colors.onSurface}
-                  />
+                <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <XIcon size={24} color={theme.colors.onSurface} weight="bold" />
                 </TouchableOpacity>
               </View>
 
               {/* Rating */}
               <View style={styles.section}>
                 <Text
-                  variant="titleSmall"
                   style={{
                     color: theme.colors.onSurface,
                     marginBottom: 12,
@@ -109,7 +93,6 @@ export default function QuickAddSheet({
               {/* Notes */}
               <View style={styles.section}>
                 <Text
-                  variant="titleSmall"
                   style={{
                     color: theme.colors.onSurface,
                     marginBottom: 8,
@@ -125,9 +108,9 @@ export default function QuickAddSheet({
                   value={notes}
                   onChangeText={setNotes}
                   multiline
-                  numberOfLines={4}
+                  numberOfLines={5}
                   style={styles.notesInput}
-                  contentStyle={{ fontFamily: 'PatrickHand_400Regular', fontSize: 16 }}
+                  contentStyle={{ fontFamily: "PatrickHand_400Regular", fontSize: 16 }}
                   outlineColor={theme.colors.outline}
                   activeOutlineColor={theme.colors.primary}
                   textColor={theme.colors.onSurface}
@@ -144,11 +127,7 @@ export default function QuickAddSheet({
                   style={styles.submitButton}
                   buttonColor={theme.colors.primary}
                   textColor={theme.colors.onPrimary}
-                  labelStyle={{
-                    fontFamily: "Righteous_400Regular",
-                    fontSize: 14,
-                    letterSpacing: 1,
-                  }}
+                  labelStyle={{ fontFamily: "Righteous_400Regular", fontSize: 14, letterSpacing: 1 }}
                 >
                   ADD TO COLLECTION
                 </Button>
@@ -175,17 +154,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
-  avoidingView: {
-    maxHeight: "90%",
-  },
+  avoidingView: { maxHeight: "90%" },
   sheet: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "100%",
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
+  scrollContent: { paddingBottom: 40 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -193,24 +168,9 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 16,
   },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  stars: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-  },
-  notesInput: {
-    backgroundColor: "transparent",
-    maxHeight: 120,
-  },
-  buttons: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-  },
-  submitButton: {
-    marginBottom: 12,
-  },
+  section: { paddingHorizontal: 20, marginBottom: 24 },
+  stars: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" },
+  notesInput: { backgroundColor: "transparent", maxHeight: 120 },
+  buttons: { paddingHorizontal: 20, paddingTop: 8 },
+  submitButton: { marginBottom: 12 },
 });

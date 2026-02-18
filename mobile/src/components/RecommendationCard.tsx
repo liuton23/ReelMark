@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Card, Button } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { UserSoundIcon, PlusCircleIcon } from 'phosphor-react-native';
 import type { Recommendation } from '../services/api';
 
 interface RecommendationCardProps {
@@ -15,31 +15,23 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
   return (
     <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
       <Card.Content>
-        {/* Header with icon */}
         <View style={styles.header}>
-          <MaterialCommunityIcons 
-            name="account-voice" 
-            size={32} 
-            color={theme.colors.primary} 
-          />
-          <Text 
-            variant="labelLarge" 
-            style={{ 
-              color: theme.colors.primary, 
+          <UserSoundIcon size={32} color={theme.colors.primary} weight="duotone" />
+          <Text
+            style={{
+              color: theme.colors.primary,
               fontFamily: 'SpaceMono_400Regular',
               fontSize: 14,
-              marginLeft: 8
+              marginLeft: 8,
             }}
           >
-            The Clerk Recommands:
+            The Clerk Recommends:
           </Text>
         </View>
 
-        {/* Title */}
-        <Text 
-          variant="headlineSmall"
-          style={{ 
-            color: theme.colors.onSurface, 
+        <Text
+          style={{
+            color: theme.colors.onSurface,
             fontFamily: "Righteous_400Regular",
             fontSize: 28,
             marginTop: 16,
@@ -49,45 +41,33 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
           {recommendation.title}
         </Text>
 
-        {/* Year & Type */}
-        <Text 
-          variant="bodyMedium" 
-          style={{ 
+        <Text
+          style={{
             color: theme.colors.onSurfaceVariant,
             fontFamily: 'SpaceMono_400Regular',
-            marginBottom: 16
+            marginBottom: 16,
           }}
         >
           {recommendation.year} • {recommendation.type === 'movie' ? 'Movie' : 'TV Show'}
         </Text>
 
-        {/* Divider */}
         <View style={[styles.divider, { backgroundColor: theme.colors.outline }]} />
 
-        {/* Reason */}
-        <Text 
-          variant="labelMedium"
-          style={{ 
+        <Text
+          style={{
             color: theme.colors.primary,
             fontFamily: 'SpaceMono_400Regular',
             fontSize: 13,
             marginBottom: 8,
-            marginTop: 16
+            marginTop: 16,
           }}
         >
           Why you'll like it:
         </Text>
-        <Text 
-          variant="bodyMedium"
-          style={{ 
-            color: theme.colors.onSurface,
-            lineHeight: 22,
-          }}
-        >
+        <Text style={{ color: theme.colors.onSurface, lineHeight: 22 }}>
           {recommendation.reason}
         </Text>
 
-        {/* Action Button */}
         {onAddToWatchlist && (
           <Button
             mode="contained"
@@ -95,12 +75,8 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
             style={styles.button}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
-            labelStyle={{ 
-              fontFamily: 'Righteous_400Regular', 
-              fontSize: 13,
-              letterSpacing: 1
-            }}
-            icon="plus-circle"
+            labelStyle={{ fontFamily: 'Righteous_400Regular', fontSize: 13, letterSpacing: 1 }}
+            icon={() => <PlusCircleIcon size={16} color={theme.colors.onPrimary} weight="fill" />}
           >
             ADD TO WATCHLIST
           </Button>
@@ -111,19 +87,8 @@ export default function RecommendationCard({ recommendation, onAddToWatchlist }:
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 12,
-    elevation: 4,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  divider: {
-    height: 2,
-    width: '100%',
-  },
-  button: {
-    marginTop: 20,
-  },
+  card: { borderRadius: 12, elevation: 4 },
+  header: { flexDirection: 'row', alignItems: 'center' },
+  divider: { height: 2, width: '100%' },
+  button: { marginTop: 20 },
 });
