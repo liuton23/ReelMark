@@ -1,4 +1,5 @@
 jest.mock('../../../services/watchEntry.service');
+jest.mock('../../../config/database');
 
 const mockCreate = jest.fn();
 jest.mock('@anthropic-ai/sdk', () => {
@@ -7,6 +8,7 @@ jest.mock('@anthropic-ai/sdk', () => {
   }));
 });
 
+import { prisma } from '../../../config/database';
 import { getUserWatchHistory } from '../../../services/watchEntry.service';
 import {
   getRecommendation,
@@ -14,6 +16,7 @@ import {
   getRemainingWatchesNeeded,
 } from '../../../services/recommendation.service';
 
+const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 const mockGetUserWatchHistory = getUserWatchHistory as jest.MockedFunction<typeof getUserWatchHistory>;
 
 function createMockWatchEntry(overrides: Record<string, any> = {}) {
@@ -64,11 +67,12 @@ function createMockHistory(count: number) {
 
 describe('Recommendation Service', () => {
   describe('getRecommendation', () => {
-    it('should generate a recommendation when user has 5+ entries', async () => {
+    it('should generate and persist a recommendation when user has 5+ entries', async () => {
       const history = createMockHistory(5);
       mockGetUserWatchHistory.mockResolvedValue(history);
+      mockPrisma.recommendation.findMany.mockResolvedValue([]);
 
-      const mockRecommendation = {
+      const aiResponse = {
         title: 'Interstellar',
         year: 2014,
         reason: 'Based on your love of dramatic films...',
@@ -76,7 +80,17 @@ describe('Recommendation Service', () => {
       };
 
       mockCreate.mockResolvedValue({
-        content: [{ type: 'text', text: JSON.stringify(mockRecommendation) }],
+        content: [{ type: 'text', text: JSON.stringify(aiResponse) }],
+      });
+
+      mockPrisma.recommendation.create.mockResolvedValue({
+        id: 'saved-rec-id',
+        userId: 'user-uuid',
+        title: aiResponse.title,
+        reason: aiResponse.reason,
+        contentId: null,
+        tmdbId: null,
+        createdAt: new Date(),
       });
 
       const result = await getRecommendation('user-uuid');
@@ -91,7 +105,15 @@ describe('Recommendation Service', () => {
           ]),
         })
       );
-      expect(result).toEqual(mockRecommendation);
+      expect(mockPrisma.recommendation.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'user-uuid',
+          title: aiResponse.title,
+          reason: aiResponse.reason,
+        }),
+      });
+      expect(result).toMatchObject(aiResponse);
+      expect(result.id).toBe('saved-rec-id');
     });
 
     it('should throw error when user has fewer than 5 entries', async () => {
@@ -108,9 +130,20 @@ describe('Recommendation Service', () => {
     it('should include preferences in the prompt when provided', async () => {
       const history = createMockHistory(5);
       mockGetUserWatchHistory.mockResolvedValue(history);
+      mockPrisma.recommendation.findMany.mockResolvedValue([]);
 
       mockCreate.mockResolvedValue({
         content: [{ type: 'text', text: JSON.stringify({ title: 'Comedy Movie', year: 2023, reason: 'Light and fun', type: 'movie' }) }],
+      });
+
+      mockPrisma.recommendation.create.mockResolvedValue({
+        id: 'saved-rec-id',
+        userId: 'user-uuid',
+        title: 'Comedy Movie',
+        reason: 'Light and fun',
+        contentId: null,
+        tmdbId: null,
+        createdAt: new Date(),
       });
 
       await getRecommendation('user-uuid', 'something lighthearted');
@@ -126,9 +159,44 @@ describe('Recommendation Service', () => {
       );
     });
 
+    it('should exclude past recommendations from the prompt', async () => {
+      const history = createMockHistory(5);
+      mockGetUserWatchHistory.mockResolvedValue(history);
+      mockPrisma.recommendation.findMany.mockResolvedValue([
+        { title: 'Previously Recommended' } as any,
+      ]);
+
+      mockCreate.mockResolvedValue({
+        content: [{ type: 'text', text: JSON.stringify({ title: 'New Movie', year: 2023, reason: 'Fresh pick', type: 'movie' }) }],
+      });
+
+      mockPrisma.recommendation.create.mockResolvedValue({
+        id: 'saved-rec-id',
+        userId: 'user-uuid',
+        title: 'New Movie',
+        reason: 'Fresh pick',
+        contentId: null,
+        tmdbId: null,
+        createdAt: new Date(),
+      });
+
+      await getRecommendation('user-uuid');
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [
+            expect.objectContaining({
+              content: expect.stringContaining('Previously Recommended'),
+            }),
+          ],
+        })
+      );
+    });
+
     it('should throw when Claude API fails', async () => {
       const history = createMockHistory(5);
       mockGetUserWatchHistory.mockResolvedValue(history);
+      mockPrisma.recommendation.findMany.mockResolvedValue([]);
       mockCreate.mockRejectedValue(new Error('API error'));
 
       await expect(getRecommendation('user-uuid')).rejects.toThrow('API error');

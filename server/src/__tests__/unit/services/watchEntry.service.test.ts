@@ -8,6 +8,7 @@ import {
   updateWatchEntry,
   deleteWatchEntry,
   getWatchEntriesForContent,
+  getUserStats,
 } from '../../../services/watchEntry.service';
 
 const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
@@ -169,99 +170,116 @@ describe('WatchEntry Service', () => {
   });
 
   describe('getWatchEntryById', () => {
-    it('should return watch entry when found', async () => {
-      mockPrisma.watchEntry.findUnique.mockResolvedValue(mockWatchEntry);
+    it('should return watch entry when found and owned by user', async () => {
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(mockWatchEntry);
 
-      const result = await getWatchEntryById('entry-uuid-1');
+      const result = await getWatchEntryById('entry-uuid-1', 'user-uuid-1');
 
-      expect(mockPrisma.watchEntry.findUnique).toHaveBeenCalledWith({
-        where: { id: 'entry-uuid-1' },
+      expect(mockPrisma.watchEntry.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'entry-uuid-1',
+          userId: 'user-uuid-1',
+        },
         include: { content: true, user: true },
       });
       expect(result).toEqual(mockWatchEntry);
     });
 
-    it('should return null when not found', async () => {
-      mockPrisma.watchEntry.findUnique.mockResolvedValue(null);
+    it('should return null when not found or not owned', async () => {
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(null);
 
-      const result = await getWatchEntryById('nonexistent');
+      const result = await getWatchEntryById('nonexistent', 'user-uuid-1');
 
       expect(result).toBeNull();
     });
 
     it('should throw on database error', async () => {
-      mockPrisma.watchEntry.findUnique.mockRejectedValue(new Error('DB error'));
+      mockPrisma.watchEntry.findFirst.mockRejectedValue(new Error('DB error'));
 
-      await expect(getWatchEntryById('id')).rejects.toThrow('DB error');
+      await expect(getWatchEntryById('id', 'user-id')).rejects.toThrow('DB error');
     });
   });
 
   describe('updateWatchEntry', () => {
-    it('should update rating and notes', async () => {
+    it('should update rating and notes when entry is owned by user', async () => {
       const updated = { ...mockWatchEntry, rating: 10, notes: 'Updated!' };
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(mockWatchEntry);
       mockPrisma.watchEntry.update.mockResolvedValue(updated);
 
-      const result = await updateWatchEntry('entry-uuid-1', 10, 'Updated!');
+      const result = await updateWatchEntry('entry-uuid-1', 'user-uuid-1', 10, 'Updated!');
 
+      expect(mockPrisma.watchEntry.findFirst).toHaveBeenCalledWith({
+        where: { id: 'entry-uuid-1', userId: 'user-uuid-1' },
+      });
       expect(mockPrisma.watchEntry.update).toHaveBeenCalledWith({
         where: { id: 'entry-uuid-1' },
         data: { rating: 10, notes: 'Updated!' },
         include: { content: true },
       });
-      expect(result.rating).toBe(10);
-      expect(result.notes).toBe('Updated!');
+      expect(result!.rating).toBe(10);
+      expect(result!.notes).toBe('Updated!');
     });
 
-    it('should update only rating', async () => {
-      const updated = { ...mockWatchEntry, rating: 7 };
-      mockPrisma.watchEntry.update.mockResolvedValue(updated);
+    it('should return null when entry not found or not owned', async () => {
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(null);
 
-      const result = await updateWatchEntry('entry-uuid-1', 7);
+      const result = await updateWatchEntry('entry-uuid-1', 'wrong-user-id', 10);
 
-      expect(mockPrisma.watchEntry.update).toHaveBeenCalledWith({
-        where: { id: 'entry-uuid-1' },
-        data: { rating: 7, notes: undefined },
-        include: { content: true },
-      });
-      expect(result.rating).toBe(7);
+      expect(mockPrisma.watchEntry.update).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it('should throw on database error', async () => {
-      mockPrisma.watchEntry.update.mockRejectedValue(new Error('DB error'));
+      mockPrisma.watchEntry.findFirst.mockRejectedValue(new Error('DB error'));
 
-      await expect(updateWatchEntry('id', 5)).rejects.toThrow('DB error');
+      await expect(updateWatchEntry('id', 'user-id', 5)).rejects.toThrow('DB error');
     });
   });
 
   describe('deleteWatchEntry', () => {
-    it('should delete and return true', async () => {
+    it('should delete and return true when owned by user', async () => {
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(mockWatchEntry);
       mockPrisma.watchEntry.delete.mockResolvedValue(mockWatchEntry);
 
-      const result = await deleteWatchEntry('entry-uuid-1');
+      const result = await deleteWatchEntry('entry-uuid-1', 'user-uuid-1');
 
+      expect(mockPrisma.watchEntry.findFirst).toHaveBeenCalledWith({
+        where: { id: 'entry-uuid-1', userId: 'user-uuid-1' },
+      });
       expect(mockPrisma.watchEntry.delete).toHaveBeenCalledWith({
         where: { id: 'entry-uuid-1' },
       });
       expect(result).toBe(true);
     });
 
-    it('should throw on database error', async () => {
-      mockPrisma.watchEntry.delete.mockRejectedValue(new Error('DB error'));
+    it('should return false when entry not found or not owned', async () => {
+      mockPrisma.watchEntry.findFirst.mockResolvedValue(null);
 
-      await expect(deleteWatchEntry('id')).rejects.toThrow('DB error');
+      const result = await deleteWatchEntry('entry-uuid-1', 'wrong-user-id');
+
+      expect(mockPrisma.watchEntry.delete).not.toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
+
+    it('should throw on database error', async () => {
+      mockPrisma.watchEntry.findFirst.mockRejectedValue(new Error('DB error'));
+
+      await expect(deleteWatchEntry('id', 'user-id')).rejects.toThrow('DB error');
     });
   });
 
   describe('getWatchEntriesForContent', () => {
-    it('should return entries for specific content', async () => {
+    it('should return entries for specific content scoped to user', async () => {
       const entries = [mockWatchEntry];
       mockPrisma.watchEntry.findMany.mockResolvedValue(entries);
 
-      const result = await getWatchEntriesForContent('content-uuid-1');
+      const result = await getWatchEntriesForContent('content-uuid-1', 'user-uuid-1');
 
       expect(mockPrisma.watchEntry.findMany).toHaveBeenCalledWith({
-        where: { contentId: 'content-uuid-1' },
-        include: { user: true },
+        where: {
+          contentId: 'content-uuid-1',
+          userId: 'user-uuid-1',
+        },
         orderBy: { watchedAt: 'desc' },
       });
       expect(result).toEqual(entries);
@@ -270,7 +288,7 @@ describe('WatchEntry Service', () => {
     it('should return empty array when no entries', async () => {
       mockPrisma.watchEntry.findMany.mockResolvedValue([]);
 
-      const result = await getWatchEntriesForContent('content-uuid-1');
+      const result = await getWatchEntriesForContent('content-uuid-1', 'user-uuid-1');
 
       expect(result).toEqual([]);
     });
@@ -278,7 +296,56 @@ describe('WatchEntry Service', () => {
     it('should throw on database error', async () => {
       mockPrisma.watchEntry.findMany.mockRejectedValue(new Error('DB error'));
 
-      await expect(getWatchEntriesForContent('id')).rejects.toThrow('DB error');
+      await expect(getWatchEntriesForContent('id', 'user-id')).rejects.toThrow('DB error');
+    });
+  });
+
+  describe('getUserStats', () => {
+    it('should return correct stats for user with entries', async () => {
+      const now = new Date();
+      const entries = [
+        { ...mockWatchEntry, content: { ...mockContent, type: 'MOVIE' as const, genres: ['Drama'] }, rating: 8, watchedAt: now },
+        { ...mockWatchEntry, id: 'e2', content: { ...mockContent, type: 'TV_SHOW' as const, genres: ['Drama', 'Crime'] }, rating: 10, watchedAt: now },
+        { ...mockWatchEntry, id: 'e3', content: { ...mockContent, type: 'MOVIE' as const, genres: ['Drama'] }, rating: null, watchedAt: new Date('2020-01-01') },
+      ];
+      mockPrisma.watchEntry.findMany.mockResolvedValue(entries as any);
+
+      const result = await getUserStats('user-uuid-1');
+
+      expect(result.totalWatched).toBe(3);
+      expect(result.movies).toBe(2);
+      expect(result.tvShows).toBe(1);
+      expect(result.favoriteGenre).toBe('Drama');
+      expect(result.averageRating).toBe(9); // average of 8 and 10
+    });
+
+    it('should return null averageRating when no entries have ratings', async () => {
+      const entries = [
+        { ...mockWatchEntry, rating: null },
+      ];
+      mockPrisma.watchEntry.findMany.mockResolvedValue(entries as any);
+
+      const result = await getUserStats('user-uuid-1');
+
+      expect(result.averageRating).toBeNull();
+    });
+
+    it('should return zeroes for user with no entries', async () => {
+      mockPrisma.watchEntry.findMany.mockResolvedValue([]);
+
+      const result = await getUserStats('user-uuid-1');
+
+      expect(result.totalWatched).toBe(0);
+      expect(result.movies).toBe(0);
+      expect(result.tvShows).toBe(0);
+      expect(result.averageRating).toBeNull();
+      expect(result.favoriteGenre).toBeNull();
+    });
+
+    it('should throw on database error', async () => {
+      mockPrisma.watchEntry.findMany.mockRejectedValue(new Error('DB error'));
+
+      await expect(getUserStats('user-uuid-1')).rejects.toThrow('DB error');
     });
   });
 });

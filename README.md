@@ -8,6 +8,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
@@ -35,6 +36,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Persisted Recommendations** — AI suggestions stored in database for retrieval
 - **Type Safety** — Full TypeScript with Prisma-generated types
 - **Comprehensive Testing** — 125+ tests across unit, integration, and E2E suites
+- **Dockerized** — Backend and database fully containerized with Docker Compose
 
 ---
 
@@ -49,6 +51,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **AI**: Anthropic Claude API (claude-sonnet-4-5)
 - **External Data**: TMDB API
 - **Testing**: Jest + Supertest
+- **Containerization**: Docker + Docker Compose
 
 ### Mobile
 
@@ -68,7 +71,11 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 
 ```
 ReelMark/
+├── docker-compose.yml             # Orchestrates api + db containers
 ├── server/                        # Backend API
+│   ├── Dockerfile                 # Builds the API image
+│   ├── .dockerignore
+│   ├── .env                       # Secrets (gitignored)
 │   ├── src/
 │   │   ├── app.ts
 │   │   ├── index.ts
@@ -134,9 +141,84 @@ ReelMark/
 
 ---
 
-## 🚀 Running Locally (on your own phone)
+## 🐳 Running with Docker (Recommended)
 
-This is the fastest way to use ReelMark without any deployment.
+Docker runs the backend API and PostgreSQL database together — no need to install PostgreSQL locally.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- [Expo Go](https://expo.dev/go) installed on your phone
+- [TMDB API key](https://www.themoviedb.org/settings/api) (free)
+- [Anthropic API key](https://console.anthropic.com/) (pay-as-you-go)
+
+### 1. Configure environment
+
+Create `server/.env`:
+
+```env
+DATABASE_URL=postgresql://postgres:yourPassword@db:5432/reelmark
+PORT=3000
+POSTGRES_PASSWORD=yourPassword
+TMDB_API_KEY=your_tmdb_key
+TMDB_BASE_URL=https://api.themoviedb.org/3
+ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+> ⚠️ Note: The hostname in `DATABASE_URL` must be `db` (not `localhost`) — this is the Docker service name.
+
+### 2. Start the containers
+
+```bash
+docker compose up --build
+```
+
+This starts both the API (port 3000) and PostgreSQL (port 5432).
+
+### 3. Run database migrations
+
+In a new terminal:
+
+```bash
+docker compose exec api npx prisma migrate deploy
+```
+
+### 4. Mobile
+
+Find your machine's local IP (Windows):
+
+```powershell
+ipconfig
+# Look for IPv4 Address under your WiFi adapter
+```
+
+Create `mobile/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
+```
+
+```bash
+cd mobile
+npm install
+npx expo start
+```
+
+Scan the QR code with your phone's Camera app (iOS) or Expo Go (Android). Your phone and laptop must be on the **same WiFi**.
+
+### Useful Docker commands
+
+```bash
+docker compose down           # Stop containers
+docker compose down -v        # Stop and wipe the database
+docker compose logs api       # View API logs
+docker compose logs db        # View database logs
+docker compose restart api    # Restart just the API
+```
+
+---
+
+## 🚀 Running Locally (without Docker)
 
 ### Prerequisites
 
@@ -175,6 +257,8 @@ npm run dev
 ```bash
 # Mac
 ipconfig getifaddr en0
+# Windows
+ipconfig
 # e.g. 192.168.1.42
 ```
 
@@ -227,22 +311,21 @@ The mobile app only knows your backend URL. Your backend handles all third-party
 
 ### Content
 
-| Method | Endpoint             | Description            |
-| ------ | -------------------- | ---------------------- |
-| `GET`  | `/api/content`       | Your library           |
-| `GET`  | `/api/content/:id`   | Content by ID          |
-| `POST` | `/api/content/movie` | Save movie from TMDB   |
-| `POST` | `/api/content/tv`    | Save TV show from TMDB |
+| Method   | Endpoint           | Description         |
+| -------- | ------------------ | ------------------- |
+| `GET`    | `/api/content`     | Your library        |
+| `GET`    | `/api/content/:id` | Content by ID       |
+| `POST`   | `/api/content`     | Add to library      |
+| `DELETE` | `/api/content/:id` | Remove from library |
 
 ### Watch Entries
 
-| Method   | Endpoint                     | Description         |
-| -------- | ---------------------------- | ------------------- |
-| `POST`   | `/api/watch-entries`         | Log a watch         |
-| `GET`    | `/api/watch-entries/history` | Your watch history  |
-| `GET`    | `/api/watch-entries/stats`   | Your statistics     |
-| `PATCH`  | `/api/watch-entries/:id`     | Update rating/notes |
-| `DELETE` | `/api/watch-entries/:id`     | Remove entry        |
+| Method   | Endpoint                 | Description         |
+| -------- | ------------------------ | ------------------- |
+| `GET`    | `/api/watch-entries`     | All watch entries   |
+| `POST`   | `/api/watch-entries`     | Log a watch         |
+| `PUT`    | `/api/watch-entries/:id` | Update rating/notes |
+| `DELETE` | `/api/watch-entries/:id` | Delete entry        |
 
 ### Recommendations
 
@@ -392,6 +475,10 @@ Routes (HTTP) → Middleware (Auth) → Services (Business Logic) → Prisma →
 Mobile → Axios (with token interceptor) → Express API → TMDB / Anthropic
 ```
 
+```
+Docker: [api container] → [db container] (internal Docker network)
+```
+
 The mobile app never holds API keys. All third-party calls go through the Express backend.
 
 ---
@@ -413,10 +500,11 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - [x] Cassette tape sign-up flow with animated card issue
 - [x] Native-style header Edit | Delete buttons on Detail screen
 - [x] Shared `MembershipCard` component across Profile + Login
+- [x] Docker + Docker Compose setup for backend and database
+- [x] Backend test updates
 
 ### 🚧 In Progress
 
-- [ ] Backend test updates
 - [ ] Frontend tests
 - [ ] Entertainment news integration
 - [ ] Loading skeletons
@@ -441,6 +529,8 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 
 **TMDB Rate Limits** — Cached content in PostgreSQL after first fetch, debounced search (300ms), added request throttling.
 
+**Docker Networking** — Prisma couldn't reach the database using `localhost` inside containers. Resolved by using the Docker Compose service name `db` as the hostname in `DATABASE_URL`.
+
 ---
 
 ## 🙏 Acknowledgments
@@ -449,6 +539,7 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - **Anthropic** — Claude AI and excellent developer experience
 - **Expo** — making React Native development fast and pleasant
 - **Prisma** — best TypeScript ORM
+- **Docker** — consistent, portable containerized development
 
 ---
 

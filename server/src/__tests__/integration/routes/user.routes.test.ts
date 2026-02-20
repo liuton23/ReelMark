@@ -3,60 +3,66 @@ jest.mock('../../../config/database');
 
 import request from 'supertest';
 import app from '../../../app';
+import { prisma } from '../../../config/database';
 import {
-  createUser,
   getUserById,
-  getOrCreateDefaultUser,
+  updateProfile,
+  deleteUser,
 } from '../../../services/user.service';
 
-const mockCreateUser = createUser as jest.MockedFunction<typeof createUser>;
+const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 const mockGetUserById = getUserById as jest.MockedFunction<typeof getUserById>;
-const mockGetOrCreateDefaultUser = getOrCreateDefaultUser as jest.MockedFunction<typeof getOrCreateDefaultUser>;
+const mockUpdateProfile = updateProfile as jest.MockedFunction<typeof updateProfile>;
+const mockDeleteUser = deleteUser as jest.MockedFunction<typeof deleteUser>;
+
+const TEST_USER_ID = 'user-uuid-1';
+const TEST_TOKEN = 'test-auth-token';
 
 const mockUser = {
-  id: '123e4567-e89b-12d3-a456-426614174000',
+  id: TEST_USER_ID,
   username: 'testuser',
   email: 'test@example.com',
+  displayName: null,
+  avatarUrl: null,
   createdAt: new Date('2025-01-01'),
 };
 
-describe('User Routes', () => {
-  describe('GET /api/users/default', () => {
-    it('should return the default user', async () => {
-      const defaultUser = { ...mockUser, username: 'default_user' };
-      mockGetOrCreateDefaultUser.mockResolvedValue(defaultUser);
-
-      const response = await request(app).get('/api/users/default');
-
-      expect(response.status).toBe(200);
-      expect(response.body.username).toBe('default_user');
-    });
-
-    it('should return 500 on service error', async () => {
-      mockGetOrCreateDefaultUser.mockRejectedValue(new Error('DB error'));
-
-      const response = await request(app).get('/api/users/default');
-
-      expect(response.status).toBe(500);
-      expect(response.body.error).toBe('Failed to get/create default user');
-    });
+beforeEach(() => {
+  mockPrisma.session.findUnique.mockResolvedValue({
+    id: 'session-id',
+    userId: TEST_USER_ID,
+    token: TEST_TOKEN,
+    expiresAt: new Date(Date.now() + 86400000),
+    createdAt: new Date(),
   });
+});
 
-  describe('GET /api/users/:id', () => {
-    it('should return user when found', async () => {
+describe('User Routes', () => {
+  describe('GET /api/users/profile', () => {
+    it('should return user profile', async () => {
       mockGetUserById.mockResolvedValue(mockUser);
 
-      const response = await request(app).get(`/api/users/${mockUser.id}`);
+      const response = await request(app)
+        .get('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.id).toBe(mockUser.id);
+      expect(response.body.id).toBe(TEST_USER_ID);
       expect(response.body.username).toBe('testuser');
+    });
+
+    it('should return 401 when not authenticated', async () => {
+      const response = await request(app).get('/api/users/profile');
+
+      expect(response.status).toBe(401);
     });
 
     it('should return 404 when user not found', async () => {
       mockGetUserById.mockResolvedValue(null);
 
-      const response = await request(app).get('/api/users/nonexistent-id');
+      const response = await request(app)
+        .get('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`);
 
       expect(response.status).toBe(404);
       expect(response.body.error).toBe('User not found');
@@ -65,57 +71,108 @@ describe('User Routes', () => {
     it('should return 500 on service error', async () => {
       mockGetUserById.mockRejectedValue(new Error('DB error'));
 
-      const response = await request(app).get('/api/users/some-id');
+      const response = await request(app)
+        .get('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`);
 
       expect(response.status).toBe(500);
-      expect(response.body.error).toBe('Failed to fetch user');
+      expect(response.body.error).toBe('Failed to fetch profile');
     });
   });
 
-  describe('POST /api/users', () => {
-    it('should create a new user', async () => {
-      mockCreateUser.mockResolvedValue(mockUser);
+  describe('PATCH /api/users/profile', () => {
+    it('should update user profile', async () => {
+      const updated = { ...mockUser, displayName: 'Test User' };
+      mockUpdateProfile.mockResolvedValue(updated);
 
       const response = await request(app)
-        .post('/api/users')
-        .send({ username: 'testuser', email: 'test@example.com' });
+        .patch('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`)
+        .send({ displayName: 'Test User' });
 
-      expect(response.status).toBe(201);
-      expect(response.body.username).toBe('testuser');
-      expect(mockCreateUser).toHaveBeenCalledWith('testuser', 'test@example.com');
+      expect(response.status).toBe(200);
+      expect(response.body.displayName).toBe('Test User');
+      expect(mockUpdateProfile).toHaveBeenCalledWith(TEST_USER_ID, {
+        displayName: 'Test User',
+        avatarUrl: undefined,
+        email: undefined,
+      });
     });
 
-    it('should return 400 when username is missing', async () => {
-      const response = await request(app)
-        .post('/api/users')
-        .send({ email: 'test@example.com' });
+    it('should update email', async () => {
+      const updated = { ...mockUser, email: 'new@example.com' };
+      mockUpdateProfile.mockResolvedValue(updated);
 
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('Username is required');
+      const response = await request(app)
+        .patch('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`)
+        .send({ email: 'new@example.com' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.email).toBe('new@example.com');
     });
 
-    it('should return 400 for duplicate username', async () => {
-      const prismaError = new Error('Unique constraint') as any;
-      prismaError.code = 'P2002';
-      mockCreateUser.mockRejectedValue(prismaError);
-
+    it('should return 401 when not authenticated', async () => {
       const response = await request(app)
-        .post('/api/users')
-        .send({ username: 'existinguser' });
+        .patch('/api/users/profile')
+        .send({ displayName: 'Test' });
 
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('Username already exists');
+      expect(response.status).toBe(401);
     });
 
-    it('should return 500 on other errors', async () => {
-      mockCreateUser.mockRejectedValue(new Error('DB error'));
+    it('should return 409 when email already in use', async () => {
+      mockUpdateProfile.mockRejectedValue(new Error('Email already in use'));
 
       const response = await request(app)
-        .post('/api/users')
-        .send({ username: 'testuser' });
+        .patch('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`)
+        .send({ email: 'taken@example.com' });
+
+      expect(response.status).toBe(409);
+      expect(response.body.error).toBe('Email already in use');
+    });
+
+    it('should return 500 on service error', async () => {
+      mockUpdateProfile.mockRejectedValue(new Error('DB error'));
+
+      const response = await request(app)
+        .patch('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`)
+        .send({ displayName: 'Test' });
 
       expect(response.status).toBe(500);
-      expect(response.body.error).toBe('Failed to create user');
+      expect(response.body.error).toBe('Failed to update profile');
+    });
+  });
+
+  describe('DELETE /api/users/profile', () => {
+    it('should delete user account', async () => {
+      mockDeleteUser.mockResolvedValue(true);
+
+      const response = await request(app)
+        .delete('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Account deleted successfully');
+      expect(mockDeleteUser).toHaveBeenCalledWith(TEST_USER_ID);
+    });
+
+    it('should return 401 when not authenticated', async () => {
+      const response = await request(app).delete('/api/users/profile');
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 500 on service error', async () => {
+      mockDeleteUser.mockRejectedValue(new Error('DB error'));
+
+      const response = await request(app)
+        .delete('/api/users/profile')
+        .set('Authorization', `Bearer ${TEST_TOKEN}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Failed to delete account');
     });
   });
 });

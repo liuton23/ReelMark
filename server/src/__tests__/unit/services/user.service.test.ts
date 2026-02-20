@@ -2,54 +2,24 @@ jest.mock('../../../config/database');
 
 import { prisma } from '../../../config/database';
 import {
-  createUser,
   getUserById,
   getUserByUsername,
-  getOrCreateDefaultUser,
-  getAllUsers,
+  updateProfile,
+  deleteUser,
 } from '../../../services/user.service';
 
 const mockPrisma = prisma as jest.MockedObjectDeep<typeof prisma>;
 
 const mockUser = {
-  id: '123e4567-e89b-12d3-a456-426614174000',
+  id: 'user-uuid-1',
   username: 'testuser',
   email: 'test@example.com',
+  displayName: null,
+  avatarUrl: null,
   createdAt: new Date('2025-01-01'),
 };
 
 describe('User Service', () => {
-  describe('createUser', () => {
-    it('should create a new user with username and email', async () => {
-      mockPrisma.user.create.mockResolvedValue(mockUser);
-
-      const result = await createUser('testuser', 'test@example.com');
-
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: { username: 'testuser', email: 'test@example.com' },
-      });
-      expect(result).toEqual(mockUser);
-    });
-
-    it('should create a user without email', async () => {
-      const userNoEmail = { ...mockUser, email: null };
-      mockPrisma.user.create.mockResolvedValue(userNoEmail);
-
-      const result = await createUser('testuser');
-
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: { username: 'testuser', email: undefined },
-      });
-      expect(result).toEqual(userNoEmail);
-    });
-
-    it('should throw on database error', async () => {
-      mockPrisma.user.create.mockRejectedValue(new Error('DB error'));
-
-      await expect(createUser('testuser')).rejects.toThrow('DB error');
-    });
-  });
-
   describe('getUserById', () => {
     it('should return user when found', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
@@ -58,6 +28,14 @@ describe('User Service', () => {
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: mockUser.id },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
       });
       expect(result).toEqual(mockUser);
     });
@@ -85,6 +63,14 @@ describe('User Service', () => {
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { username: 'testuser' },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
       });
       expect(result).toEqual(mockUser);
     });
@@ -104,58 +90,72 @@ describe('User Service', () => {
     });
   });
 
-  describe('getOrCreateDefaultUser', () => {
-    it('should return existing default user', async () => {
-      const defaultUser = { ...mockUser, username: 'default_user' };
-      mockPrisma.user.findUnique.mockResolvedValue(defaultUser);
+  describe('updateProfile', () => {
+    it('should update displayName', async () => {
+      const updated = { ...mockUser, displayName: 'Test User' };
+      mockPrisma.user.update.mockResolvedValue(updated);
 
-      const result = await getOrCreateDefaultUser();
+      const result = await updateProfile('user-uuid-1', { displayName: 'Test User' });
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { username: 'default_user' },
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-uuid-1' },
+        data: { displayName: 'Test User' },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
       });
-      expect(result).toEqual(defaultUser);
-      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+      expect(result.displayName).toBe('Test User');
     });
 
-    it('should create default user when not found', async () => {
-      const defaultUser = { ...mockUser, username: 'default_user' };
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-      mockPrisma.user.create.mockResolvedValue(defaultUser);
+    it('should update email', async () => {
+      const updated = { ...mockUser, email: 'new@example.com' };
+      mockPrisma.user.update.mockResolvedValue(updated);
 
-      const result = await getOrCreateDefaultUser();
+      const result = await updateProfile('user-uuid-1', { email: 'new@example.com' });
 
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: { username: 'default_user', email: undefined },
-      });
-      expect(result).toEqual(defaultUser);
+      expect(result.email).toBe('new@example.com');
+    });
+
+    it('should throw "Email already in use" on P2002 error', async () => {
+      const prismaError = new Error('Unique constraint') as any;
+      prismaError.code = 'P2002';
+      mockPrisma.user.update.mockRejectedValue(prismaError);
+
+      await expect(updateProfile('user-uuid-1', { email: 'taken@example.com' })).rejects.toThrow(
+        'Email already in use',
+      );
+    });
+
+    it('should rethrow on other database errors', async () => {
+      mockPrisma.user.update.mockRejectedValue(new Error('DB error'));
+
+      await expect(updateProfile('user-uuid-1', { displayName: 'Test' })).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 
-  describe('getAllUsers', () => {
-    it('should return array of users', async () => {
-      const users = [mockUser, { ...mockUser, id: 'another-id', username: 'user2' }];
-      mockPrisma.user.findMany.mockResolvedValue(users);
+  describe('deleteUser', () => {
+    it('should delete user and return true', async () => {
+      mockPrisma.user.delete.mockResolvedValue(mockUser as any);
 
-      const result = await getAllUsers();
+      const result = await deleteUser('user-uuid-1');
 
-      expect(mockPrisma.user.findMany).toHaveBeenCalled();
-      expect(result).toEqual(users);
-      expect(result).toHaveLength(2);
-    });
-
-    it('should return empty array when no users', async () => {
-      mockPrisma.user.findMany.mockResolvedValue([]);
-
-      const result = await getAllUsers();
-
-      expect(result).toEqual([]);
+      expect(mockPrisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 'user-uuid-1' },
+      });
+      expect(result).toBe(true);
     });
 
     it('should throw on database error', async () => {
-      mockPrisma.user.findMany.mockRejectedValue(new Error('DB error'));
+      mockPrisma.user.delete.mockRejectedValue(new Error('DB error'));
 
-      await expect(getAllUsers()).rejects.toThrow('DB error');
+      await expect(deleteUser('user-uuid-1')).rejects.toThrow('DB error');
     });
   });
 });
