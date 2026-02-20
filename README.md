@@ -195,7 +195,7 @@ ipconfig
 Create `mobile/.env`:
 
 ```env
-EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
+EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
 ```
 
 ```bash
@@ -274,7 +274,7 @@ npm install
 Create `mobile/.env`:
 
 ```env
-EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
+EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
 ```
 
 ```bash
