@@ -9,6 +9,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Azure](https://img.shields.io/badge/Azure-0078D4?style=flat&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
 
 ---
 
@@ -52,6 +53,8 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **External Data**: TMDB API
 - **Testing**: Jest + Supertest
 - **Containerization**: Docker + Docker Compose
+- **Cloud**: Azure Container Registry + Azure Container Apps
+- **Production DB**: Supabase (PostgreSQL)
 
 ### Mobile
 
@@ -195,7 +198,7 @@ ipconfig
 Create `mobile/.env`:
 
 ```env
-EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
+EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
 ```
 
 ```bash
@@ -214,6 +217,40 @@ docker compose down -v        # Stop and wipe the database
 docker compose logs api       # View API logs
 docker compose logs db        # View database logs
 docker compose restart api    # Restart just the API
+```
+
+---
+
+## ☁️ Cloud Deployment (Azure)
+
+The backend is deployed to **Azure Container Apps** with **Supabase** as the managed production database.
+
+### Infrastructure
+
+- **Container Registry**: Azure Container Registry (ACR) — stores Docker images
+- **Hosting**: Azure Container Apps — runs the containerized API
+- **Database**: Supabase — managed PostgreSQL
+
+### Deploying a new version
+
+**1. Build and push a new image to ACR:**
+
+```bash
+az acr login --name reelmarkregistry
+docker build -t reelmarkregistry.azurecr.io/reelmark-api:latest ./server
+docker push reelmarkregistry.azurecr.io/reelmark-api:latest
+```
+
+**2. Restart the Container App to pull the latest image:**
+
+```bash
+az containerapp update --name reelmark-api --resource-group reelmark-rg --image reelmarkregistry.azurecr.io/reelmark-api:latest
+```
+
+**3. Run migrations against Supabase (if schema changed):**
+
+```powershell
+$env:DATABASE_URL="your-supabase-connection-string"; npx prisma migrate deploy
 ```
 
 ---
@@ -274,7 +311,7 @@ npm install
 Create `mobile/.env`:
 
 ```env
-EXPO_PUBLIC_API_URL=http://192.168.X.X:3000/api
+EXPO_PUBLIC_API_URL=http://192.168.1.42:3000/api
 ```
 
 ```bash
@@ -476,7 +513,12 @@ Mobile → Axios (with token interceptor) → Express API → TMDB / Anthropic
 ```
 
 ```
-Docker: [api container] → [db container] (internal Docker network)
+Docker (local): [api container] → [db container] (internal Docker network)
+```
+
+```
+Production: Mobile → Azure Container Apps (API) → Supabase (PostgreSQL)
+                                                 → TMDB / Anthropic
 ```
 
 The mobile app never holds API keys. All third-party calls go through the Express backend.
@@ -501,17 +543,19 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - [x] Native-style header Edit | Delete buttons on Detail screen
 - [x] Shared `MembershipCard` component across Profile + Login
 - [x] Docker + Docker Compose setup for backend and database
-- [x] Backend test updates
+- [x] Azure Container Registry — Docker image hosted in the cloud
+- [x] Azure Container Apps — API deployed and publicly accessible
+- [x] Supabase — managed production PostgreSQL database
 
 ### 🚧 In Progress
 
+- [ ] Backend test updates
 - [ ] Frontend tests
 - [ ] Entertainment news integration
 - [ ] Loading skeletons
 
 ### 📅 Planned
 
-- [ ] Backend deployment (Railway)
 - [ ] iOS App Store release
 - [ ] Social features (friends, shared watchlists)
 - [ ] Advanced stats (genre breakdowns, watch streaks, yearly recaps)
@@ -531,6 +575,8 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 
 **Docker Networking** — Prisma couldn't reach the database using `localhost` inside containers. Resolved by using the Docker Compose service name `db` as the hostname in `DATABASE_URL`.
 
+**Prisma on Alpine Linux** — Prisma 5 requires OpenSSL which Alpine doesn't include by default. Resolved by switching to `node:20-slim` (Debian-based) and installing OpenSSL via `apt-get`.
+
 ---
 
 ## 🙏 Acknowledgments
@@ -540,6 +586,8 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - **Expo** — making React Native development fast and pleasant
 - **Prisma** — best TypeScript ORM
 - **Docker** — consistent, portable containerized development
+- **Azure** — Container Registry and Container Apps for cloud deployment
+- **Supabase** — managed PostgreSQL for production database
 
 ---
 
