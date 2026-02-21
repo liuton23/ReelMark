@@ -231,6 +231,12 @@ The backend is deployed to **Azure Container Apps** with **Supabase** as the man
 - **Hosting**: Azure Container Apps — runs the containerized API
 - **Database**: Supabase — managed PostgreSQL
 
+> ⚠️ **Supabase + Prisma 6**: Use the **connection pooling URL** (port `6543`) for `DATABASE_URL`. Get it from Supabase dashboard → **Connect** → **Prisma**.
+>
+> ```env
+> DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+> ```
+
 ### Deploying a new version
 
 **1. Build and push a new image to ACR:**
@@ -549,14 +555,12 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 
 ### 🚧 In Progress
 
-- [ ] Backend test updates
 - [ ] Frontend tests
 - [ ] Entertainment news integration
 - [ ] Loading skeletons
 
 ### 📅 Planned
 
-- [ ] iOS App Store release
 - [ ] Social features (friends, shared watchlists)
 - [ ] Advanced stats (genre breakdowns, watch streaks, yearly recaps)
 - [ ] Export data (CSV, JSON)
@@ -576,6 +580,8 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 **Docker Networking** — Prisma couldn't reach the database using `localhost` inside containers. Resolved by using the Docker Compose service name `db` as the hostname in `DATABASE_URL`.
 
 **Prisma on Alpine Linux** — Prisma 5 requires OpenSSL which Alpine doesn't include by default. Resolved by switching to `node:20-slim` (Debian-based) and installing OpenSSL via `apt-get`.
+
+**Supabase + Prisma 6 Connection** — Prisma 6 requires the connection pooling URL (port `6543` with `?pgbouncer=true`) when connecting to Supabase. Using the standard port `5432` caused connection failures in production.
 
 ---
 
