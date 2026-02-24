@@ -1,13 +1,14 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { searchMovies, searchMulti } from './services/tmdb.service';
+import { searchMulti } from './services/tmdb.service';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import contentRoutes from './routes/content.routes';
 import watchEntryRoutes from './routes/watchEntry.routes';
 import recommendationRoutes from './routes/recommendation.routes';
 import { authenticate } from './middleware/auth.middleware';
+import './config/redis';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.get('/api/search/multi', async (req: Request, res: Response) => {
   try {
     const query = req.query.q as string;
+    console.log('🔍 Search endpoint hit with query:', query);
     if (!query) {
       return res.status(400).json({ error: 'Query parameter "q" is required' });
     }
