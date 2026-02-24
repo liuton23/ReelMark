@@ -10,6 +10,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Azure](https://img.shields.io/badge/Azure-0078D4?style=flat&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 
 ---
 
@@ -38,6 +39,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Type Safety** — Full TypeScript with Prisma-generated types
 - **Comprehensive Testing** — 125+ tests across unit, integration, and E2E suites
 - **Dockerized** — Backend and database fully containerized with Docker Compose
+- **Redis Caching** — TMDB search results cached for 5 minutes, content details for 24 hours
 
 ---
 
@@ -53,6 +55,7 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **External Data**: TMDB API
 - **Testing**: Jest + Supertest
 - **Containerization**: Docker + Docker Compose
+- **Caching**: Redis (ioredis) — TMDB search and content detail caching
 - **Cloud**: Azure Container Registry + Azure Container Apps
 - **Production DB**: Supabase (PostgreSQL)
 
@@ -83,7 +86,8 @@ ReelMark/
 │   │   ├── app.ts
 │   │   ├── index.ts
 │   │   ├── config/
-│   │   │   └── database.ts
+│   │   │   ├── database.ts
+│   │   │   └── redis.ts
 │   │   ├── middleware/
 │   │   │   └── auth.middleware.ts
 │   │   ├── services/
@@ -176,7 +180,7 @@ ANTHROPIC_API_KEY=your_anthropic_key
 docker compose up --build
 ```
 
-This starts both the API (port 3000) and PostgreSQL (port 5432).
+This starts the API (port 3000), PostgreSQL (port 5432), and Redis (port 6379).
 
 ### 3. Run database migrations
 
@@ -512,6 +516,7 @@ model Recommendation {
 
 ```
 Routes (HTTP) → Middleware (Auth) → Services (Business Logic) → Prisma → PostgreSQL
+                                                              → Redis (cache)
 ```
 
 ```
@@ -552,6 +557,7 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - [x] Azure Container Registry — Docker image hosted in the cloud
 - [x] Azure Container Apps — API deployed and publicly accessible
 - [x] Supabase — managed production PostgreSQL database
+- [x] Redis caching — TMDB search results (5 min TTL) and content details (24hr TTL)
 
 ### 🚧 In Progress
 
@@ -575,7 +581,7 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 
 **Mobile Keyboard** — iOS keyboard hid bottom sheet inputs. Fixed with `KeyboardAvoidingView` + safe area insets.
 
-**TMDB Rate Limits** — Cached content in PostgreSQL after first fetch, debounced search (300ms), added request throttling.
+**TMDB Rate Limits** — Cached content in PostgreSQL after first fetch, debounced search (300ms), added request throttling. Further improved with Redis caching — search results cached for 5 minutes and content details for 24 hours, eliminating redundant TMDB API calls.
 
 **Docker Networking** — Prisma couldn't reach the database using `localhost` inside containers. Resolved by using the Docker Compose service name `db` as the hostname in `DATABASE_URL`.
 
@@ -594,6 +600,7 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - **Docker** — consistent, portable containerized development
 - **Azure** — Container Registry and Container Apps for cloud deployment
 - **Supabase** — managed PostgreSQL for production database
+- **Redis** — fast in-memory caching via ioredis
 
 ---
 
