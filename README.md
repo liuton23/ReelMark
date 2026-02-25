@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="mobile/assets/icon.png" width="120" alt="ReelMark App Icon" />
+</div>
+
 # 🎬 ReelMark
 
 > Your personal video store in your pocket
@@ -396,10 +400,11 @@ The mobile app only knows your backend URL. Your backend handles all third-party
 ```prisma
 model User {
   id           String   @id @default(uuid())
-  username     String   @unique
   email        String?  @unique
-  passwordHash String
+  username     String   @unique
+  passwordHash String?
   displayName  String?
+  avatarUrl    String?
   createdAt    DateTime @default(now())
 
   watchEntries    WatchEntry[]
@@ -410,54 +415,79 @@ model User {
 model Session {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
 }
 
 model Content {
   id               String      @id @default(uuid())
   tmdbId           Int         @unique
-  type             ContentType // MOVIE | TV_SHOW
+  type             ContentType
   title            String
   releaseYear      Int?
   posterPath       String?
   genres           String[]
   overview         String?
+  runtime          Int?
+  showType         String?
   numberOfSeasons  Int?
   numberOfEpisodes Int?
+  episodeRuntime   Int?
   createdAt        DateTime    @default(now())
 
   watchEntries    WatchEntry[]
   recommendations Recommendation[]
 }
 
+enum ContentType {
+  MOVIE
+  TV_SHOW
+}
+
 model WatchEntry {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
   watchedAt DateTime @default(now())
-  rating    Int?     // 1–10
+  rating    Int?     // 1-10 scale
   notes     String?
 
-  user    User    @relation(fields: [userId], references: [id])
-  content Content @relation(fields: [contentId], references: [id])
+  // For TV shows - track specific season/episode if needed
+  season    Int?
+  episode   Int?
 
-  @@unique([userId, contentId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, contentId, season, episode])
+  @@index([userId])                // Fast: fetch all entries for a user
+  @@index([userId, watchedAt])     // Fast: user's entries sorted by date (stats, activity)
+  @@index([contentId])             // Fast: how many users watched a given title
 }
 
 model Recommendation {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   contentId String?
+  content   Content? @relation(fields: [contentId], references: [id])
+
   title     String
   reason    String
   tmdbId    Int?
   createdAt DateTime @default(now())
 
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content Content? @relation(fields: [contentId], references: [id])
+  @@index([userId])
 }
 ```
 
@@ -558,6 +588,7 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - [x] Azure Container Apps — API deployed and publicly accessible
 - [x] Supabase — managed production PostgreSQL database
 - [x] Redis caching — TMDB search results (5 min TTL) and content details (24hr TTL)
+- [x] Database query optimization — indexes on WatchEntry for scalable user lookups
 
 ### 🚧 In Progress
 
@@ -588,6 +619,8 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 **Prisma on Alpine Linux** — Prisma 5 requires OpenSSL which Alpine doesn't include by default. Resolved by switching to `node:20-slim` (Debian-based) and installing OpenSSL via `apt-get`.
 
 **Supabase + Prisma 6 Connection** — Prisma 6 requires the connection pooling URL (port `6543` with `?pgbouncer=true`) when connecting to Supabase. Using the standard port `5432` caused connection failures in production.
+
+**Database Migration Drift** — Resolved out-of-sync local migration history using `prisma migrate resolve --applied` to baseline existing schema without data loss.
 
 ---
 
