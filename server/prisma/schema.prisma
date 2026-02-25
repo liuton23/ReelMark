@@ -81,6 +81,9 @@ model WatchEntry {
   updatedAt DateTime @updatedAt
   
   @@unique([userId, contentId, season, episode]) // Prevent duplicate entries
+  @@index([userId])                              // Fast: fetch all entries for a user
+  @@index([userId, watchedAt])                   // Fast: user's entries sorted by date (stats, activity)
+  @@index([contentId])                           // Fast: how many users watched a given title
 }
 
 model Recommendation {
