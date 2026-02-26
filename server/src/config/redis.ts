@@ -13,4 +13,5 @@ redis.on('error', (err) => {
   console.error('Redis error:', err);
 });
 
+export const SESSION_CACHE_PREFIX = 'session:';
 export default redis;
