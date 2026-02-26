@@ -230,12 +230,19 @@ export const apiService = {
     return response.data;
   },
 
-  // ── Recommendations (no more userId in body/URL) ──────────────
+  // ── Recommendations ───────────────────────────────────────────
 
-  getRecommendation: async (preferences?: string): Promise<RecommendationResponse> => {
+  // Returns jobId immediately — use getRecommendationJob to poll
+  getRecommendation: async (preferences?: string): Promise<{ jobId: string; status: string }> => {
     const response = await api.post('/recommendations', {
       preferences: preferences || undefined,
     });
+    return response.data;
+  },
+
+  // Poll this until status === 'completed' or 'failed'
+  getRecommendationJob: async (jobId: string): Promise<{ status: string; recommendation?: Recommendation; error?: string }> => {
+    const response = await api.get(`/recommendations/job/${jobId}`);
     return response.data;
   },
 

@@ -1,9 +1,14 @@
 import express, { Request, Response } from 'express';
-import { canGetRecommendations, getRecommendation, getRemainingWatchesNeeded, getUserRecommendations } from '../services/recommendation.service';
+import {
+  canGetRecommendations,
+  getRemainingWatchesNeeded,
+  getUserRecommendations,
+} from '../services/recommendation.service';
+import { recommendationQueue } from '../config/queue';
 
 const router = express.Router();
 
-// Get a new recommendation for the authenticated user
+// POST / — queue a recommendation job, return jobId immediately
 router.post('/', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
@@ -14,9 +19,8 @@ router.post('/', async (req: Request, res: Response) => {
 
     const { preferences } = req.body;
 
-    // Check if user has enough watch history
+    // Check eligibility before queuing
     const canRecommend = await canGetRecommendations(userId);
-    
     if (!canRecommend) {
       const remaining = await getRemainingWatchesNeeded(userId);
       return res.status(400).json({
@@ -26,23 +30,53 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    const recommendation = await getRecommendation(userId, preferences);
+    // Add job to queue — returns immediately
+    const job = await recommendationQueue.add('generate', { userId, preferences });
 
-    res.json({ recommendation });
+    res.json({ jobId: job.id, status: 'processing' });
   } catch (error) {
     console.error('Route error:', error);
-    res.status(500).json({
-      error: 'Failed to get recommendation',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
+    res.status(500).json({ error: 'Failed to queue recommendation' });
   }
 });
 
-// Get past recommendations for the authenticated user
+// GET /job/:jobId — poll for job result
+router.get('/job/:jobId', async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const jobId = Array.isArray(req.params.jobId) ? req.params.jobId[0] : req.params.jobId;
+    const job = await recommendationQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    const state = await job.getState();
+
+    if (state === 'completed') {
+      return res.json({ status: 'completed', recommendation: job.returnvalue });
+    }
+
+    if (state === 'failed') {
+      return res.status(500).json({ status: 'failed', error: job.failedReason });
+    }
+
+    // Still processing (waiting, active, delayed)
+    return res.json({ status: 'processing' });
+  } catch (error) {
+    console.error('Route error:', error);
+    res.status(500).json({ error: 'Failed to get job status' });
+  }
+});
+
+// GET /history — past recommendations
 router.get('/history', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -55,12 +89,10 @@ router.get('/history', async (req: Request, res: Response) => {
   }
 });
 
-// Check recommendation eligibility for the authenticated user
-// Changed from /status/:userId to /status
+// GET /status — check recommendation eligibility
 router.get('/status', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -71,8 +103,8 @@ router.get('/status', async (req: Request, res: Response) => {
     res.json({
       canGetRecommendations: canRecommend,
       remainingWatchesNeeded: remaining,
-      message: canRecommend 
-        ? 'Ready for recommendations!' 
+      message: canRecommend
+        ? 'Ready for recommendations!'
         : `Watch ${remaining} more to unlock recommendations`,
     });
   } catch (error) {
