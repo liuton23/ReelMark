@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import { FilmStripIcon, PlusCircleIcon } from 'phosphor-react-native';
+import { FilmStripIcon, PlusCircleIcon, CheckCircleIcon } from 'phosphor-react-native';
 import { TouchableOpacity } from 'react-native';
 import AnimatedPressable from './AnimatedPressable';
 
@@ -19,9 +19,10 @@ interface SearchResultCardProps {
   result: SearchResult;
   onPress: () => void;
   onQuickAdd?: () => void;
+  isWatched?: boolean;
 }
 
-export default function SearchResultCard({ result, onPress, onQuickAdd }: SearchResultCardProps) {
+export default function SearchResultCard({ result, onPress, onQuickAdd, isWatched = false }: SearchResultCardProps) {
   const theme = useTheme();
 
   const title = result.title || result.name || 'Unknown';
@@ -38,7 +39,7 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
   const mediaType = result.media_type || (result.title ? 'movie' : 'tv');
 
   return (
-    <AnimatedPressable onPress={onPress}>
+    <AnimatedPressable onPress={isWatched ? undefined : onPress}>
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
         <View style={styles.posterContainer}>
           {posterUrl ? (
@@ -62,9 +63,19 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
           >
             {year || 'N/A'} • {mediaType === 'movie' ? 'Movie' : 'TV Show'}
           </Text>
+          {isWatched && (
+            <Text style={{ color: '#4CAF50', fontFamily: 'SpaceMono_400Regular', fontSize: 11, marginTop: 4 }}>
+              In your collection
+            </Text>
+          )}
         </View>
 
-        {onQuickAdd && (
+        {/* Watched indicator or add button */}
+        {isWatched ? (
+          <View style={styles.addButton}>
+            <CheckCircleIcon size={28} color="#4CAF50" weight="fill" />
+          </View>
+        ) : onQuickAdd ? (
           <TouchableOpacity
             onPress={onQuickAdd}
             style={styles.addButton}
@@ -72,7 +83,7 @@ export default function SearchResultCard({ result, onPress, onQuickAdd }: Search
           >
             <PlusCircleIcon size={28} color={theme.colors.primary} weight="fill" />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
     </AnimatedPressable>
   );

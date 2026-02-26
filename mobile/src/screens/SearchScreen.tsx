@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Text, useTheme, Searchbar } from 'react-native-paper';
 import { apiService } from '../services/api';
@@ -14,9 +14,28 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
+  // Set of tmdbIds the user has already watched — fetched once on mount
+  const [watchedTmdbIds, setWatchedTmdbIds] = useState<Set<number>>(new Set());
+
   // Quick add sheet
   const [sheetVisible, setSheetVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  // Fetch watch history once on mount and build a fast-lookup Set
+  useEffect(() => {
+    const loadWatchedIds = async () => {
+      try {
+        const history = await apiService.getWatchHistory();
+        const ids = new Set(history.map((entry) => entry.content.tmdbId));
+        setWatchedTmdbIds(ids);
+      } catch (error) {
+        // Non-critical — fail silently, no watched indicators shown
+        console.error('Failed to load watch history:', error);
+      }
+    };
+
+    loadWatchedIds();
+  }, []);
 
   const handleSearch = async (searchQuery: string) => {
     if (searchQuery.trim().length < 2) {
@@ -53,14 +72,14 @@ export default function SearchScreen() {
       result={item}
       onPress={() => handleQuickAdd(item)}
       onQuickAdd={() => handleQuickAdd(item)}
+      isWatched={watchedTmdbIds.has(item.id)}
     />
-  ), [handleQuickAdd]);
+  ), [handleQuickAdd, watchedTmdbIds]);
 
   const handleSubmitAdd = async (rating: number | undefined, notes: string) => {
     if (!selectedItem) return;
 
     try {
-      // media_type comes from the /search/multi response
       const contentType = selectedItem.media_type === 'tv' ? 'tv' : 'movie';
       await apiService.addWatchEntry({
         tmdbId: selectedItem.id,
@@ -68,6 +87,9 @@ export default function SearchScreen() {
         rating,
         notes: notes || undefined,
       });
+
+      // Update local watched set so the card reflects immediately
+      setWatchedTmdbIds((prev) => new Set(prev).add(selectedItem.id));
 
       setSheetVisible(false);
       setSelectedItem(null);
