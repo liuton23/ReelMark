@@ -6,7 +6,7 @@
 
 > Your personal video store in your pocket
 
-A full-stack movie and TV tracking app with AI-powered recommendations. Built with a nostalgic retro video store aesthetic — warm cream, burnt orange, flickering neon, and now a fully interactive membership card.
+A full-stack movie and TV tracking app with AI-powered recommendations. Built with a nostalgic retro video store aesthetic — warm cream, burnt orange, flickering neon, and a fully interactive membership card.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -27,8 +27,8 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Interactive Membership Card** 📇 — Tiltable card on profile using DeviceMotion + pan gesture (gravity-aware, springs back on release)
 - **Track Your Watches** 🎥 — Log movies and TV shows with personal ratings (1–10) and notes
 - **Edit Ratings & Notes** ✏️ — Native header buttons (Edit | Delete) styled to match iOS back button
-- **Smart Search** 🔍 — Browse 600K+ movies and TV shows via TMDB multi-search
-- **AI Recommendations** 🤖 — Personalized suggestions from Claude AI, saved to your profile
+- **Smart Search** 🔍 — Browse 600K+ movies and TV shows via TMDB multi-search, with watched indicators so you never double-log
+- **AI Recommendations** 🤖 — Personalized suggestions from Claude AI via async background queue, saved to your profile
 - **Beautiful Stats** 📊 — Dashboard with watch counts, monthly activity, favorite genres
 - **Neon UI** 💡 — Flickering neon text headers with realistic vintage signage effect
 - **Retro Design** 📼 — Poster-first library grid, warm color palette, custom retro fonts
@@ -36,14 +36,15 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 
 ### 🔧 Backend API
 
-- **Secure Authentication** — Session-based auth with bcrypt password hashing
+- **Secure Authentication** — Session-based auth with bcrypt password hashing, sessions cached in Redis for fast validation
 - **User Scoping** — All content and watch history strictly scoped to authenticated user
 - **TMDB Integration** — Automatic content fetching with posters, metadata, genres
-- **Persisted Recommendations** — AI suggestions stored in database for retrieval
+- **Async AI Recommendations** — BullMQ job queue processes Anthropic API calls in the background; frontend polls for results
+- **Persisted Recommendations** — AI suggestions stored in database, deduped against past recommendations
 - **Type Safety** — Full TypeScript with Prisma-generated types
 - **Comprehensive Testing** — 125+ tests across unit, integration, and E2E suites
 - **Dockerized** — Backend and database fully containerized with Docker Compose
-- **Redis Caching** — TMDB search results cached for 5 minutes, content details for 24 hours
+- **Redis Caching** — TMDB search (5 min TTL), content details (24hr TTL), and session tokens cached for performance
 
 ---
 
@@ -54,12 +55,13 @@ A full-stack movie and TV tracking app with AI-powered recommendations. Built wi
 - **Runtime**: Node.js 20+ with TypeScript
 - **Framework**: Express.js (REST API)
 - **Database**: PostgreSQL + Prisma ORM
-- **Auth**: Session-based with bcrypt hashing
+- **Auth**: Session-based with bcrypt hashing + Redis session cache
 - **AI**: Anthropic Claude API (claude-sonnet-4-5)
+- **Queue**: BullMQ — async job processing for AI recommendations
 - **External Data**: TMDB API
 - **Testing**: Jest + Supertest
 - **Containerization**: Docker + Docker Compose
-- **Caching**: Redis (ioredis) — TMDB search and content detail caching
+- **Caching**: Redis (ioredis) + Upstash (production)
 - **Cloud**: Azure Container Registry + Azure Container Apps
 - **Production DB**: Supabase (PostgreSQL)
 
@@ -91,9 +93,12 @@ ReelMark/
 │   │   ├── index.ts
 │   │   ├── config/
 │   │   │   ├── database.ts
-│   │   │   └── redis.ts
+│   │   │   ├── redis.ts
+│   │   │   └── queue.ts           # BullMQ queue setup
 │   │   ├── middleware/
 │   │   │   └── auth.middleware.ts
+│   │   ├── workers/
+│   │   │   └── recommendation.worker.ts  # Processes AI recommendation jobs
 │   │   ├── services/
 │   │   │   ├── auth.service.ts
 │   │   │   ├── user.service.ts
@@ -176,7 +181,7 @@ TMDB_BASE_URL=https://api.themoviedb.org/3
 ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
-> ⚠️ Note: The hostname in `DATABASE_URL` must be `db` (not `localhost`) — this is the Docker service name.
+> ⚠️ Note: The hostname in `DATABASE_URL` must be `db` (not `localhost`) — this is the Docker service name. No `REDIS_URL` needed locally — the app connects to the Docker Redis service automatically.
 
 ### 2. Start the containers
 
@@ -231,13 +236,14 @@ docker compose restart api    # Restart just the API
 
 ## ☁️ Cloud Deployment (Azure)
 
-The backend is deployed to **Azure Container Apps** with **Supabase** as the managed production database.
+The backend is deployed to **Azure Container Apps** with **Supabase** as the managed production database and **Upstash** as the managed Redis instance.
 
 ### Infrastructure
 
 - **Container Registry**: Azure Container Registry (ACR) — stores Docker images
 - **Hosting**: Azure Container Apps — runs the containerized API
 - **Database**: Supabase — managed PostgreSQL
+- **Redis**: Upstash — serverless Redis for caching and job queue (free tier)
 
 > ⚠️ **Supabase + Prisma 6**: Use the **connection pooling URL** (port `6543`) for `DATABASE_URL`. Get it from Supabase dashboard → **Connect** → **Prisma**.
 >
@@ -245,7 +251,19 @@ The backend is deployed to **Azure Container Apps** with **Supabase** as the man
 > DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
 > ```
 
+### Required Azure environment variables
+
+```env
+DATABASE_URL=your-supabase-pooling-url
+TMDB_API_KEY=your_tmdb_key
+TMDB_BASE_URL=https://api.themoviedb.org/3
+ANTHROPIC_API_KEY=your_anthropic_key
+REDIS_URL=rediss://default:your-password@your-endpoint.upstash.io:6379
+```
+
 ### Deploying a new version
+
+Deployments are triggered automatically on push via Azure Pipelines. To deploy manually:
 
 **1. Build and push a new image to ACR:**
 
@@ -380,11 +398,12 @@ The mobile app only knows your backend URL. Your backend handles all third-party
 
 ### Recommendations
 
-| Method | Endpoint                       | Description                |
-| ------ | ------------------------------ | -------------------------- |
-| `POST` | `/api/recommendations`         | Generate AI recommendation |
-| `GET`  | `/api/recommendations/history` | Past recommendations       |
-| `GET`  | `/api/recommendations/status`  | Check eligibility          |
+| Method | Endpoint                          | Description                         |
+| ------ | --------------------------------- | ----------------------------------- |
+| `POST` | `/api/recommendations`            | Queue AI recommendation job         |
+| `GET`  | `/api/recommendations/job/:jobId` | Poll job status and retrieve result |
+| `GET`  | `/api/recommendations/history`    | Past recommendations                |
+| `GET`  | `/api/recommendations/status`     | Check eligibility                   |
 
 ### Search & Health
 
@@ -546,7 +565,8 @@ model Recommendation {
 
 ```
 Routes (HTTP) → Middleware (Auth) → Services (Business Logic) → Prisma → PostgreSQL
-                                                              → Redis (cache)
+                                                              → Redis (cache + sessions)
+                                                              → BullMQ (job queue)
 ```
 
 ```
@@ -554,11 +574,20 @@ Mobile → Axios (with token interceptor) → Express API → TMDB / Anthropic
 ```
 
 ```
+Recommendation flow:
+POST /recommendations → Queue job → Return jobId
+GET  /recommendations/job/:id → Poll until completed → Return result
+BullMQ Worker → Anthropic API → Save to DB → Mark job complete
+```
+
+```
 Docker (local): [api container] → [db container] (internal Docker network)
+                               → [redis container]
 ```
 
 ```
 Production: Mobile → Azure Container Apps (API) → Supabase (PostgreSQL)
+                                                 → Upstash (Redis)
                                                  → TMDB / Anthropic
 ```
 
@@ -586,8 +615,13 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - [x] Docker + Docker Compose setup for backend and database
 - [x] Azure Container Registry — Docker image hosted in the cloud
 - [x] Azure Container Apps — API deployed and publicly accessible
+- [x] Azure Pipelines — auto-deploy on push
 - [x] Supabase — managed production PostgreSQL database
 - [x] Redis caching — TMDB search results (5 min TTL) and content details (24hr TTL)
+- [x] Redis session caching — auth middleware checks Redis before PostgreSQL
+- [x] Upstash — serverless Redis for production (caching + job queue)
+- [x] BullMQ job queue — async AI recommendation processing
+- [x] Search watched indicators — already-logged titles show a check instead of add button
 - [x] Database query optimization — indexes on WatchEntry for scalable user lookups
 
 ### 🚧 In Progress
@@ -608,11 +642,15 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 
 **Recommendation Quality** — Simple genre matching felt generic. Integrated Claude AI to analyze watch history holistically, considering ratings, notes, and patterns.
 
+**Recommendation Latency** — Anthropic API calls block the request thread for 3–10 seconds. Moved to a BullMQ job queue — the route returns a `jobId` instantly and the frontend polls `GET /recommendations/job/:jobId` every 2 seconds until complete.
+
 **Membership Card Tilt** — `PanResponder` + `Animated` ran on the JS thread and lagged. Switched to `react-native-reanimated` + `react-native-gesture-handler` for UI-thread animations. Added `DeviceMotion` as a base layer with gesture on top, additively combined.
 
 **Mobile Keyboard** — iOS keyboard hid bottom sheet inputs. Fixed with `KeyboardAvoidingView` + safe area insets.
 
 **TMDB Rate Limits** — Cached content in PostgreSQL after first fetch, debounced search (300ms), added request throttling. Further improved with Redis caching — search results cached for 5 minutes and content details for 24 hours, eliminating redundant TMDB API calls.
+
+**Session Validation at Scale** — Every authenticated request originally hit PostgreSQL to validate the session token. Moved session data to Redis — auth middleware checks Redis first (O(1) lookup) and only falls back to PostgreSQL on a cache miss. Works correctly across multiple Azure Container App instances since Redis is external and shared.
 
 **Docker Networking** — Prisma couldn't reach the database using `localhost` inside containers. Resolved by using the Docker Compose service name `db` as the hostname in `DATABASE_URL`.
 
@@ -631,8 +669,10 @@ The mobile app never holds API keys. All third-party calls go through the Expres
 - **Expo** — making React Native development fast and pleasant
 - **Prisma** — best TypeScript ORM
 - **Docker** — consistent, portable containerized development
-- **Azure** — Container Registry and Container Apps for cloud deployment
+- **Azure** — Container Registry, Container Apps, and Pipelines for cloud deployment
 - **Supabase** — managed PostgreSQL for production database
+- **Upstash** — serverless Redis for production caching and job queue
+- **BullMQ** — reliable job queue built on Redis
 - **Redis** — fast in-memory caching via ioredis
 
 ---
